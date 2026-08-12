@@ -1,0 +1,36 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+// Mobile touch-friendly styles
+.navbar-toggler {
+  outline: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  
+  &:focus,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
+  
+  @media (hover: none) and (pointer: coarse) {
+    // Touch devices
+    &:active {
+      opacity: 0.7;
+    }
+  }
+}
+
+.navbar-toggler:not(.collapsed) .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5h12M2 11h12'/%3e%3c/svg%3e");
+}

@@ -1,0 +1,83 @@
+/*--------------------------------------------------------------
+# About 
+--------------------------------------------------------------*/
+
+.about-text span {
+  color: #ff0000; 
+  font-weight: bold;
+}
+
+.about-text p {
+  color: #FFFFFF !important;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  text-align: justify;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 767.98px) {
+  .about-text p {
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+    text-align: left !important;
+    color: #FFFFFF !important;
+  }
+  
+  .about-text span {
+    font-size: 0.95rem !important;
+    color: #ff0000 !important;
+    font-weight: bold !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .about-text p {
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    color: #FFFFFF !important;
+  }
+  
+  .about-text span {
+    font-size: 0.9rem !important;
+    color: #ff0000 !important;
+  }
+}
+
+@media (max-width: 374.98px) {
+  .about-text p {
+    font-size: 0.85rem !important;
+    line-height: 1.4 !important;
+    color: #FFFFFF !important;
+  }
+  
+  .about-text span {
+    font-size: 0.85rem !important;
+    color: #ff0000 !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .about-text p {
+    font-size: 1rem !important;
+    line-height: 1.7 !important;
+    color: #FFFFFF !important;
+  }
+  
+  .about-text span {
+    font-size: 1rem !important;
+    color: #ff0000 !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .about-text p {
+    font-size: 1.1rem !important;
+    line-height: 1.8 !important;
+    color: #FFFFFF !important;
+  }
+  
+  .about-text span {
+    font-size: 1.1rem !important;
+    color: #ff0000 !important;
+  }
+}

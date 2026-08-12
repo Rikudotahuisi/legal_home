@@ -1,0 +1,211 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: arial, helvatica,sans-serif;
+}
+
+.box{
+  max-width: 500px;
+  background: #fff;
+  padding: 10px;
+  width: 500px;
+  height: 600px;
+  border-radius: 5px;
+  -webkit-border-radius:5px;
+  -moz-border-radius:5px;
+  -ms-border-radius:5px;
+  -o-border-radius:5px;
+}
+
+.upload-area-title{
+text-align: center;
+margin-bottom: 20px;
+font-size: 20px;
+font-weight: 400;
+}
+.uploadlabel{
+width: 100%;
+min-height: 50px;
+background: #18a7ff0d ;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+border: 3px dashed #77dd77;
+cursor: pointer;
+}
+
+.uploadlabel span{
+font-size: 20px;
+color: #77dd77;
+font-family: cursive;
+}
+
+.uploaded{
+margin: 10px 0;
+font-size: 16px;
+font-weight: 700;
+color: #a5a5a5;
+}
+.showfilebox{
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin: 10px 0;
+padding:5px 15px;
+box-shadow: #0000000d 0px 0px 0px 1px, #d1d5db3d 0px 0px 0px 1px inset;
+}
+.showfilebox .left{
+display: flex;
+align-items: center;
+flex-wrap: wrap;
+gap: 10px;
+}
+.filetype{
+background: #1c775a;
+color: #fff;
+padding: 5px 10px;
+font-size: 10px;
+text-transform: capitalize;
+font-weight: 200;
+border-radius: 3px;
+-webkit-border-radius:3px;
+-moz-border-radius:3px;
+-ms-border-radius:3px;
+-o-border-radius:3px;
+}
+h3{
+font-weight: 600;
+font-size: 13px;
+color: #292F42;
+margin: 0;
+}
+.right span{
+background: red;
+color: #fff;
+width: 25px;
+height: 25px;
+font-size: 25px;
+line-height: 25px;
+display: inline-block;
+text-align: center;
+font-weight: 700;
+cursor: pointer;
+border-radius: 50%;
+-webkit-border-radius:50%;
+-moz-border-radius:50%;
+-ms-border-radius:50%;
+-o-border-radius:50%;
+}
+
+.contact .info-container {
+background-color: #fffffd;
+height: 100%;
+padding: 20px;
+border-radius: 10px 0 0 10px;
+box-shadow: 0px 2px 25px rgba(0, 0, 0, 0.1);
+}
+
+.contact .php-email-form {
+width: 100%;
+height: 100%;
+background: #fffffd;
+box-shadow: 0px 2px 25px rgba(0, 0, 0, 0.1);
+padding: 25px;
+border-radius: 0 10px 10px 0;
+}
+
+.contact .error-message {
+display: none;
+color: #fff;
+background:#1c775a;
+text-align: left;
+padding: 15px;
+font-weight: 600;
+}
+
+.contact .error-message br+br {
+margin-top: 25px;
+}
+
+.contact .sent-message {
+display: none;
+color: #fff;
+background: #1c775a;
+text-align: center;
+padding: 15px;
+font-weight: 600;
+}
+
+.contact .loading {
+display: none;
+background: #1c775a;
+text-align: center;
+padding: 15px;
+}
+
+.contact .loading:before {
+content: "";
+display: inline-block;
+border-radius: 50%;
+width: 24px;
+height: 24px;
+margin: 0 10px -6px 0;
+border: 3px solid #059652;
+border-top-color: #77dd77;
+animation: animate-loading 1s linear infinite;
+}
+
+.contact .php-email-form textarea {
+border-radius: 0;
+box-shadow: none;
+font-size: 14px;
+}
+
+.contact .php-email-form textarea {
+padding: 12px 15px;
+}
+
+.contact .php-email-form textarea:focus {
+border-color: #77dd77;
+}
+
+.contact .php-email-form textarea {
+padding: 10px 12px;
+}
+
+button[type=submit] {
+background: #1c775a;
+border: 0;
+padding: 14px 45px;
+transition: 0.4s;
+border-radius: 50px;
+margin-top: 10px;
+color: #fff;
+}
+
+button[type=submit]:hover {
+background: #77dd77;
+}
+
+.cloudsaja{
+display: none;
+}
+table {
+border-collapse: collapse;
+width: 150%;
+text-align: center;
+
+}
+
+th, td {
+border: 1px solid #1c775a;
+
+
+}
+
+th {
+background-color: #1c775a;
+color: white;
+}

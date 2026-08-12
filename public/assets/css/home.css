@@ -1,0 +1,211 @@
+/*--------------------------------------------------------------
+# Hero Section 
+--------------------------------------------------------------*/
+#hero {
+    width: 100%;
+    height: 90vh;
+    background: #fff;
+    padding-top: 30px;
+    margin-bottom: 20px;
+  }
+  
+  #hero .container {
+    padding-top: 72px;
+  }
+  
+  #hero h2 {
+    margin: 0 0 10px 0;
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 56px;
+    color: #fff;
+  }
+  
+  #hero .btn-get-started {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    letter-spacing: 2px;
+    display: inline-block;
+    padding: 10px 28px 11px 28px;
+    border-radius: 50px;
+    transition: 0.5s;
+    margin: 10px 0 0 0;
+    color: #fff;
+    background: #ff7f50;
+    text-decoration: none;
+    text-align: right;
+  }
+  
+  #hero .btn-get-started:hover {
+    background: #209dd8;
+  }
+  
+  #hero .animated {
+    animation: up-down 2s ease-in-out infinite alternate-reverse both;
+  }
+  
+  @media (max-width: 991px) {
+    #hero {
+      height: 100vh;
+      text-align: center;
+    }
+  
+    #hero .animated {
+      animation: none;
+    }
+  
+    #hero .hero-img {
+      text-align: center;
+    }
+  
+    #hero .hero-img img {
+      width: 50%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    #hero h1 {
+      font-size: 28px;
+      line-height: 36px;
+    }
+  
+    #hero h2 {
+      font-size: 18px;
+      line-height: 24px;
+      margin-bottom: 30px;
+    }
+  
+    #hero .hero-img img {
+      width: 70%;
+    }
+  }
+  
+  @media (max-width: 575px) {
+    #hero .hero-img img {
+      width: 80%;
+    }
+  
+    #hero .btn-get-started {
+      font-size: 16px;
+      padding: 10px 24px 11px 24px;
+    }
+  }
+  
+  @keyframes up-down {
+    0% {
+      transform: translateY(10px);
+    }
+  
+    100% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .carousel-item {
+    font-family: "Poppins", sans-serif;
+  }
+  
+  
+  .carousel-caption {
+    transform: translateY(-200px);
+    /* HAPUS BACKGROUND: background: rgba(0, 0, 0, 0.6); */
+    padding: 20px;
+    /* HAPUS BORDER RADIUS: border-radius: 10px; */
+    left: 10%;
+    right: 10%;
+    background: transparent !important; /* TEXT TRANSPARAN SAJA */
+  }
+  
+  .carousel-caption h5 {
+    font-size: 48px; 
+    color: white !important; /* WARNA TEXT PUTIH */
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8); /* SHADOW UNTUK TEXT */
+    margin-bottom: 15px;
+  }
+  
+  .carousel-caption p {
+    font-size: 18px; 
+    color: white !important; /* WARNA TEXT PUTIH */
+    text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.8); /* SHADOW UNTUK TEXT */
+    line-height: 1.5;
+  }
+  
+  
+  @media (max-width: 991.98px) {
+    .carousel-caption {
+      transform: translateY(-150px);
+    }
+    
+    .carousel-caption h5 {
+      font-size: 32px;
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+    
+    .carousel-caption p {
+      font-size: 16px;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+    }
+  }
+  
+  
+  @media (max-width: 767.98px) {
+    .carousel-caption {
+      transform: translateY(-80px) !important; 
+      bottom: 20px !important; 
+      left: 5% !important;
+      right: 5% !important;
+      padding: 15px !important;
+    }
+    
+    .carousel-caption h5 {
+      font-size: 22px !important;
+      margin-bottom: 10px !important;
+      text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.7);
+    }
+    
+    .carousel-caption p {
+      font-size: 14px !important;
+      line-height: 1.4 !important;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+    }
+  }
+  
+ 
+  @media (max-width: 575.98px) {
+    .carousel-caption {
+      transform: translateY(-50px) !important; 
+      padding: 12px !important;
+    }
+    
+    .carousel-caption h5 {
+      font-size: 18px !important;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+    }
+    
+    .carousel-caption p {
+      font-size: 12px !important;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+    }
+  }
+  
+  @media (max-width: 374.98px) {
+    .carousel-caption {
+      transform: translateY(-30px) !important; 
+      padding: 10px !important;
+    }
+    
+    .carousel-caption h5 {
+      font-size: 16px !important;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+    }
+    
+    .carousel-caption p {
+      font-size: 11px !important;
+      display: -webkit-box;
+      -webkit-line-clamp: 2; 
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+    }
+  }

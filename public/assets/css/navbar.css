@@ -1,0 +1,125 @@
+.nav-link{
+    margin-left: 10px;
+    margin-right: 10px;
+    color: #4A8DB7;
+  }
+
+.navbar {
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5);
+  }
+
+/* Navbar toggle button fix for mobile/touch devices */
+.navbar-toggler {
+    border: none !important;
+    padding: 0.5rem 0.75rem !important;
+    outline: none !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation !important;
+    background-color: transparent !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar-toggler:focus,
+.navbar-toggler:active,
+.navbar-toggler.collapsed,
+.navbar-toggler:not(.collapsed) {
+    outline: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+}
+
+.navbar-toggler-icon {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    vertical-align: middle;
+    background: no-repeat center / 100% 100%;
+    pointer-events: none;
+}
+
+.navbar-collapse {
+    overflow: visible !important;
+}
+
+.navbar-collapse.show {
+    display: block !important;
+}
+
+.navbar-collapse:not(.show) {
+    display: none !important;
+}
+  
+.nav-link:not(.button):hover{
+    color: #4A8DB7;
+}
+
+#navmenu a {
+    color: #4A8DB7;
+  }
+
+#navbar a{
+    color: #4A8DB7;
+}
+
+#navmenu a,
+.navbar-brand {
+  color: #4A8DB7;
+  font-family: 'Poppins', sans-serif;
+  font-weight: normal;
+}
+
+.navbar-brand{
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 25px !important;
+  color: #4A8DB7 !important;
+}
+.navbar-brand .logo-home {
+    height: 35px;
+}
+
+.button{
+    transition-property: background-color, padding;
+    transition-duration: .4s;
+    background-color: #006d77;
+    border-radius: 10px;
+    margin-right: 7px;
+}
+
+.button:hover{
+    background-color: black;
+    color: white;
+    border-radius: 10px;
+    margin-right: 7px;
+}
+
+
+.navbar-nav .nav-link {
+  position: relative;
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.navbar-nav .nav-link::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background-color: #4A8DB7; 
+  transition: all 0.3s ease;
+  transform-origin: 50% 50%;
+}
+
+.navbar-nav .nav-link:not(.button):hover::after {
+  width: 100%;
+  transform: translateX(-50%);
+  color: #4A8DB7;
+}
+
+.nav-item.button a.nav-link { 
+  color: white !important;
+}

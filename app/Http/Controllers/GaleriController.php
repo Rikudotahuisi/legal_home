@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\AdminSpace;
+namespace App\Http\Controllers;
 
 use App\Models\Artikel;
 use App\Models\Galeri;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class GaleriController extends Controller
 {
@@ -16,7 +16,7 @@ class GaleriController extends Controller
     public function view_list($artikelId)
     {
         $artikel = Artikel::with('galeri')->findOrFail($artikelId);
-        return view('admin.galeri.list', compact('artikel'));
+        return view('galeri.list', compact('artikel'));
     }
 
     /**
@@ -25,7 +25,7 @@ class GaleriController extends Controller
     public function view_create($artikelId)
     {
         $artikel = Artikel::findOrFail($artikelId);
-        return view('admin.galeri.create', compact('artikel'));
+        return view('galeri.create', compact('artikel'));
     }
 
     /**
@@ -82,7 +82,7 @@ class GaleriController extends Controller
         $artikel = Artikel::findOrFail($artikelId);
         $galeri = Galeri::where('artikel_id', $artikelId)->findOrFail($id);
 
-        return view('admin.galeri.show', compact('artikel', 'galeri'));
+        return view('galeri.show', compact('artikel', 'galeri'));
     }
 
     /**
@@ -93,7 +93,7 @@ class GaleriController extends Controller
         $artikel = Artikel::findOrFail($artikelId);
         $galeri = Galeri::where('artikel_id', $artikelId)->findOrFail($id);
 
-        return view('admin.galeri.update', compact('artikel', 'galeri'));
+        return view('galeri.update', compact('artikel', 'galeri'));
     }
 
     /**

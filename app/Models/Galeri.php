@@ -10,7 +10,7 @@ class Galeri extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'galeri';
+    protected $table = 'galeris';
 
     protected $fillable = [
         'artikel_id',

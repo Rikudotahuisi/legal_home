@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('galeri', function (Blueprint $table) {
+        Schema::create('galeris', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('artikel_id')->constrained('artikel')->onDelete('cascade');
+            $table->foreignId('artikel_id')->constrained('artikels')->onDelete('cascade');
             $table->string('judul_gambar')->nullable();
             $table->string('file_path');
             $table->string('file_name');
@@ -36,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('galeri');
+        Schema::dropIfExists('galeris');
     }
 };

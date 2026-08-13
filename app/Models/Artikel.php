@@ -46,7 +46,7 @@ class Artikel extends Model
     /**
      * Relasi one-to-many ke Galeri
      */
-    public function galeri()
+    public function galeris()
     {
         return $this->hasMany(Galeri::class, 'artikel_id')
                     ->orderBy('urutan', 'asc');

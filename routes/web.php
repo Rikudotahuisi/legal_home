@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -22,12 +24,9 @@ Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('ho
 Route::get('/legality', [App\Http\Controllers\HomeController::class, 'legality'])->name('legality');
 Route::get('/contact', [App\Http\Controllers\HomeController::class, 'contact'])->name('contact');
 Route::get('/about', [App\Http\Controllers\HomeController::class, 'about'])->name('about');
-Route::get('/register', [App\Http\Controllers\Auth\RegisterController::class, 'register'])->name('register');
-Route::post('/register', [App\Http\Controllers\Auth\RegisterController::class, 'register']);
+Route::get('/artikel', [App\Http\Controllers\HomeController::class, 'artikel'])->name('artikel');
+Route::get('/galery', [App\Http\Controllers\HomeController::class, 'galery'])->name('galery');
 
-Route::get('/login', [App\Http\Controllers\Auth\LoginController::class, 'login'])->name('login');
-Route::post('/login', [App\Http\Controllers\Auth\LoginController::class, 'login']);
-Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
 Route::prefix('admin')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\AdminSpace\AdminController::class, 'index'])->name("dashboard");

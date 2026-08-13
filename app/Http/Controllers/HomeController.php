@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+
 
 class HomeController extends Controller
 {
@@ -18,19 +20,27 @@ class HomeController extends Controller
 
     public function index()
     {
-        return view('home.home');
+        return inertia::render('home/Index');
     }
     public function legality()
     {
-        return view ('home.legalitas');
+        return inertia::render('home/Legality');
     }
     public function contact()
     {
-        return view ('home.contact');
+        return inertia::render('home/Contact');
     }
     public function about()
     {
-        return view ('home.about');
+        return inertia::render('home/About');
+    }
+    public function artikel()
+    {
+        return inertia::render('home/Artikel');
+    }
+    public function galery()
+    {
+        return inertia::render('home/Galery');
     }
     public function login()
     {

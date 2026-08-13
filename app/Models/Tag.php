@@ -12,7 +12,7 @@ class Tag extends Model
     /**
      * Nama tabel yang digunakan
      */
-    protected $table = 'tag';
+    protected $table = 'tags';
 
     /**
      * The attributes that are mass assignable.

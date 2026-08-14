@@ -1,22 +1,34 @@
-<script setup>
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import { Link } from '@inertiajs/vue3';
-</script>
-
+<!-- resources/js/Layouts/GuestLayout.vue -->
 <template>
-    <div
-        class="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0"
-    >
-        <div>
-            <Link href="/">
-                <ApplicationLogo class="h-20 w-20 fill-current text-gray-500" />
-            </Link>
-        </div>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Navbar Sederhana -->
+    <nav class="bg-white shadow-sm">
+      <div class="container mx-auto px-4 py-3">
+        <Link href="/" class="text-2xl font-bold">
+          <span class="text-blue-900">Legal</span><span class="text-gray-700">Home</span>
+        </Link>
+      </div>
+    </nav>
 
-        <div
-            class="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg"
-        >
-            <slot />
-        </div>
-    </div>
+    <!-- Content -->
+    <main>
+      <slot />
+    </main>
+
+    <!-- Footer Sederhana -->
+    <footer class="bg-gray-900 text-white py-6 mt-8">
+      <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+        &copy; 2026 LegalHome. All rights reserved.
+      </div>
+    </footer>
+  </div>
 </template>
+
+<script>
+import { Link } from '@inertiajs/vue3';
+
+export default {
+  name: 'GuestLayout',
+  components: { Link }
+}
+</script>

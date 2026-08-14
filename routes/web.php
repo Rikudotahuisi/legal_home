@@ -2,7 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ArtikelController;
+use App\Http\Controllers\TagController;
+use App\Models\Artikel;
+use App\Models\Tag;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +18,8 @@ use Inertia\Inertia;
 | contains the "web" middleware group. Now create something great!
 |
 */
+// ===== AUTH ROUTES =====
+require __DIR__.'/auth.php';
 
 Route::get('kuda', function () {
     return view('welcome');
@@ -24,60 +30,91 @@ Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('ho
 Route::get('/legality', [App\Http\Controllers\HomeController::class, 'legality'])->name('legality');
 Route::get('/contact', [App\Http\Controllers\HomeController::class, 'contact'])->name('contact');
 Route::get('/about', [App\Http\Controllers\HomeController::class, 'about'])->name('about');
-Route::get('/artikel', [App\Http\Controllers\HomeController::class, 'artikel'])->name('artikel');
 Route::get('/galery', [App\Http\Controllers\HomeController::class, 'galery'])->name('galery');
 
+// ===== ARTIKEL ROUTES =====
+Route::prefix('artikel')->group(function () {
+    Route::get('/', function () {
+        $artikels = Artikel::with(['creator', 'tags'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(9);
+            
+        return Inertia::render('home/Artikel', [
+            'mode' => 'index',
+            'artikels' => $artikels,
+            'canCreate' => auth()->check()
+        ]);
+    })->name('artikel.index');
 
-Route::prefix('admin')->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\AdminSpace\AdminController::class, 'index'])->name("dashboard");
+    Route::get('/create', function () {
+        return Inertia::render('home/Artikel', [
+            'mode' => 'create',
+            'tags' => Tag::all()
+        ]);
+    })->middleware('auth')->name('artikel.create');
 
-	Route::prefix('article')->group(function () {
-	    Route::get('/list', [App\Http\Controllers\AdminSpace\ArticleController::class, "view_list"])->name("article-list");
-	    Route::get('/create', [App\Http\Controllers\AdminSpace\ArticleController::class, "view_create"])->name("create-article");
-		Route::get('/update', [App\Http\Controllers\AdminSpace\ArticleController::class, "view_update"])->name("update-article");
+    Route::post('/', [ArtikelController::class, 'store'])
+        ->middleware('auth')
+        ->name('artikel.store');
 
-	    Route::post('/list', [App\Http\Controllers\AdminSpace\ArticleController::class, "post_list"])->name("list-article-post");
-	    Route::post('/delete', [App\Http\Controllers\AdminSpace\ArticleController::class, "post_delete"])->name("delete-article-post");
-	    Route::post('/create', [App\Http\Controllers\AdminSpace\ArticleController::class, "post_create"])->name("create-article-post");
-	    Route::post('/update', [App\Http\Controllers\AdminSpace\ArticleController::class, "post_update"])->name("update-article-post");
-	});
+    Route::get('/trashed', function () {
+        $artikels = Artikel::onlyTrashed()
+            ->with(['creator', 'tags'])
+            ->orderBy('deleted_at', 'desc')
+            ->paginate(9);
+            
+        return Inertia::render('home/Artikel', [
+            'mode' => 'trashed',
+            'artikels' => $artikels
+        ]);
+    })->middleware('auth')->name('artikel.trashed');
 
-    Route::prefix('artikel-tag')->group(function () {
-        Route::post('/attach', [App\Http\Controllers\AdminSpace\ArtikelTagController::class, "post_attach"])->name("attach-tag-post");
-        Route::post('/detach', [App\Http\Controllers\AdminSpace\ArtikelTagController::class, "post_detach"])->name("detach-tag-post");
-        Route::post('/sync', [App\Http\Controllers\AdminSpace\ArtikelTagController::class, "post_sync"])->name("sync-tag-post");
-    });
+    Route::post('/restore/{id}', [ArtikelController::class, 'restore'])
+        ->middleware('auth')
+        ->name('artikel.restore');
+
+    Route::delete('/force-delete/{id}', [ArtikelController::class, 'forceDelete'])
+        ->middleware('auth')
+        ->name('artikel.force-delete');
+
+    Route::get('/{id}', function ($id) {
+        $artikel = Artikel::with(['creator', 'tags'])->findOrFail($id);
+        
+        return Inertia::render('home/Artikel', [
+            'mode' => 'show',
+            'artikel' => $artikel
+        ]);
+    })->name('artikel.show');
+
+    Route::get('/{id}/edit', function ($id) {
+        $artikel = Artikel::with('tags')->findOrFail($id);
+        
+        return Inertia::render('home/Artikel', [
+            'mode' => 'edit',
+            'artikel' => $artikel,
+            'tags' => Tag::all(),
+            'selectedTags' => $artikel->tags->pluck('id')->toArray()
+        ]);
+    })->middleware('auth')->name('artikel.edit');
+
+    Route::put('/{id}', [ArtikelController::class, 'update'])
+        ->middleware('auth')
+        ->name('artikel.update');
+
+    Route::delete('/{id}', [ArtikelController::class, 'destroy'])
+        ->middleware('auth')
+        ->name('artikel.destroy');
+});
 
     Route::prefix('tag')->group(function () {
-        Route::get('/list', [App\Http\Controllers\AdminSpace\TagController::class, "view_list"])->name("tag-list");
-        Route::get('/create', [App\Http\Controllers\AdminSpace\TagController::class, "view_create"])->name("create-tag");
-        Route::get('/update/{id}', [App\Http\Controllers\AdminSpace\TagController::class, "view_update"])->name("update-tag");
-        Route::get('/show/{id}', [App\Http\Controllers\AdminSpace\TagController::class, "view_show"])->name("show-tag");
+        Route::get('/list', [App\Http\Controllers\TagController::class, "view_list"])->name("tag-list");
+        Route::get('/create', [App\Http\Controllers\TagController::class, "view_create"])->name("create-tag");
+        Route::get('/update/{id}', [App\Http\Controllers\TagController::class, "view_update"])->name("update-tag");
+        Route::get('/show/{id}', [App\Http\Controllers\TagController::class, "view_show"])->name("show-tag");
 
-        Route::post('/list', [App\Http\Controllers\AdminSpace\TagController::class, "post_list"])->name("list-tag-post");
-        Route::post('/delete', [App\Http\Controllers\AdminSpace\TagController::class, "post_delete"])->name("delete-tag-post");
-        Route::post('/create', [App\Http\Controllers\AdminSpace\TagController::class, "post_create"])->name("create-tag-post");
-        Route::post('/update/{id}', [App\Http\Controllers\AdminSpace\TagController::class, "post_update"])->name("update-tag-post");
+        Route::post('/list', [App\Http\Controllers\TagController::class, "post_list"])->name("list-tag-post");
+        Route::post('/delete', [App\Http\Controllers\TagController::class, "post_delete"])->name("delete-tag-post");
+        Route::post('/create', [App\Http\Controllers\TagController::class, "post_create"])->name("create-tag-post");
+        Route::post('/update/{id}', [App\Http\Controllers\TagController::class, "post_update"])->name("update-tag-post");
     });
-
-
-	Route::prefix('license')->group(function () {
-	    Route::get('/list', [App\Http\Controllers\AdminSpace\LicenseController::class, "view_list"])->name("license-list");
-	    Route::get('/create', [App\Http\Controllers\AdminSpace\LicenseController::class, "view_create"])->name("create-license");
-		Route::get('/update', [App\Http\Controllers\AdminSpace\LicenseController::class, "view_update"])->name("update-license");
-
-	    Route::post('/delete', [App\Http\Controllers\AdminSpace\LicenseController::class, "post_delete"])->name("delete-license-post");
-	    Route::post('/create', [App\Http\Controllers\AdminSpace\LicenseController::class, "post_create"])->name("create-license-post");
-	    Route::post('/update', [App\Http\Controllers\AdminSpace\LicenseController::class, "post_update"])->name("update-license-post");
-	});
-
-	Route::prefix('user')->group(function () {
-	    Route::get('/list', [App\Http\Controllers\AdminSpace\UserController::class, "view_list"])->name("user-list");
-	    Route::get('/create', [App\Http\Controllers\AdminSpace\UserController::class, "view_create"])->name("create-user");
-		Route::get('/update', [App\Http\Controllers\AdminSpace\UserController::class, "view_update"])->name("update-user");
-
-	    Route::post('/delete', [App\Http\Controllers\AdminSpace\UserController::class, "post_delete"])->name("delete-user-post");
-	    Route::post('/create', [App\Http\Controllers\AdminSpace\UserController::class, "post_create"])->name("create-user-post");
-	    Route::post('/update', [App\Http\Controllers\AdminSpace\UserController::class, "post_update"])->name("update-user-post");
-	});
-});
+	

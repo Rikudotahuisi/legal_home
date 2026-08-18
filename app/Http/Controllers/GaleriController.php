@@ -7,6 +7,7 @@ use App\Models\Galeri;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class GaleriController extends Controller
 {
@@ -209,5 +210,18 @@ class GaleriController extends Controller
             return number_format($bytes / 1024, 2) . ' KB';
         }
         return $bytes . ' B';
+    }
+
+    /**
+     * Display gallery as slider for frontend
+     */
+    public function view_slider($artikelId)
+    {
+        $artikel = Artikel::with(['galeri' => function($query) {
+            $query->orderBy('urutan');
+        }])->findOrFail($artikelId);
+
+        // Kirim ke view slider
+        return view('galeri.slider', compact('artikel'));
     }
 }

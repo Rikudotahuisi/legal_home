@@ -11,14 +11,20 @@ use App\Models\Tag;
 
 require __DIR__.'/auth.php';
 
+// ============================================================
 // ===== HALAMAN DEPAN =====
+// ============================================================
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::get('/galery', [HomeController::class, 'galery'])->name('galery');
 Route::get('/legality', [HomeController::class, 'legality'])->name('legality');
 
+// ============================================================
 // ===== ARTIKEL ROUTES =====
+// ============================================================
+
 Route::prefix('artikel')->group(function () {
     Route::get('/', function () {
         $artikels = Artikel::with(['creator', 'tags'])
@@ -95,6 +101,7 @@ Route::prefix('artikel')->group(function () {
 // ============================================================
 // ===== TAG ROUTES (Satu File Vue) =====
 // ============================================================
+
 Route::prefix('tag')->group(function () {
     // ===== LIST =====
     Route::get('/list', function () {
@@ -137,6 +144,7 @@ Route::prefix('tag')->group(function () {
 // ============================================================
 // ===== ADMIN DASHBOARD =====
 // ============================================================
+
 Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return Inertia::render('admin/Dashboard', [

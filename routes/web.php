@@ -63,18 +63,18 @@ Route::prefix('artikel')->group(function () {
         ->middleware('auth')
         ->name('artikel.force-delete');
 
-    Route::get('/{id}', function ($id) {
-        $artikel = Artikel::with(['creator', 'tags'])->findOrFail($id);
-        
+    Route::get('/{slug}', function ($slug) {
+        $artikel = Artikel::with(['creator', 'tags'])->where('slug', $slug)->firstOrFail();
+
         return Inertia::render('home/Artikel', [
             'mode' => 'show',
             'artikel' => $artikel
         ]);
     })->name('artikel.show');
 
-    Route::get('/{id}/edit', function ($id) {
-        $artikel = Artikel::with('tags')->findOrFail($id);
-        
+    Route::get('/{slug}/edit', function ($slug) {
+        $artikel = Artikel::with('tags')->where('slug', $slug)->firstOrFail();
+
         return Inertia::render('home/Artikel', [
             'mode' => 'edit',
             'artikel' => $artikel,
@@ -83,11 +83,11 @@ Route::prefix('artikel')->group(function () {
         ]);
     })->middleware('auth')->name('artikel.edit');
 
-    Route::put('/{id}', [ArtikelController::class, 'update'])
+    Route::put('/{slug}', [ArtikelController::class, 'update'])
         ->middleware('auth')
         ->name('artikel.update');
 
-    Route::delete('/{id}', [ArtikelController::class, 'destroy'])
+    Route::delete('/{slug}', [ArtikelController::class, 'destroy'])
         ->middleware('auth')
         ->name('artikel.destroy');
 });

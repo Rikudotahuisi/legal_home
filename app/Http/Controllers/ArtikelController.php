@@ -83,9 +83,9 @@ class ArtikelController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show($slug)
     {
-        $artikel = Artikel::with(['creator', 'tags'])->findOrFail($id);
+        $artikel = Artikel::with(['creator', 'tags'])->where('slug', $slug)->firstOrFail();
 
         return Inertia::render('home/Artikel', [
             'mode' => 'show',
@@ -96,9 +96,9 @@ class ArtikelController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit($slug)
     {
-        $artikel = Artikel::with('tags')->findOrFail($id);
+        $artikel = Artikel::with('tags')->where('slug', $slug)->firstOrFail();
         $tags = Tag::all();
         $selectedTags = $artikel->tags->pluck('id')->toArray();
 
@@ -113,14 +113,14 @@ class ArtikelController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $slug)
     {
-        $artikel = Artikel::findOrFail($id);
+        $artikel = Artikel::where('slug', $slug)->firstOrFail();
 
         $request->validate([
             'artikeltitle' => 'required|string|max:255',
             'artikelcontent' => 'required|string',
-            'slug' => 'nullable|string|unique:artikel,slug,' . $id,
+            'slug' => 'nullable|string|unique:artikel,slug,' . $artikel->id,
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tag,id',
         ]);
@@ -131,7 +131,7 @@ class ArtikelController extends Controller
         // Cek unique slug
         $originalSlug = $slug;
         $counter = 1;
-        while (Artikel::withTrashed()->where('slug', $slug)->where('id', '!=', $id)->exists()) {
+        while (Artikel::withTrashed()->where('slug', $slug)->where('id', '!=', $artikel->id)->exists()) {
             $slug = $originalSlug . '-' . $counter++;
         }
 
@@ -156,9 +156,9 @@ class ArtikelController extends Controller
     /**
      * Remove the specified resource from storage (Soft Delete).
      */
-    public function destroy($id)
+    public function destroy($slug)
     {
-        $artikel = Artikel::findOrFail($id);
+        $artikel = Artikel::where('slug', $slug)->firstOrFail();
         $artikel->delete();
 
         return redirect()->route('artikel.index')
@@ -169,47 +169,64 @@ class ArtikelController extends Controller
      * Display a listing of trashed (soft deleted) resources.
      */
     public function trashed()
-    {
-        $artikels = Artikel::onlyTrashed()
-                    ->with(['creator', 'tags'])
-                    ->orderBy('deleted_at', 'desc')
-                    ->paginate(9);
-
-        return Inertia::render('home/Artikel', [
-            'mode' => 'trashed',
-            'artikels' => $artikels
-        ]);
+{
+    // ===== CEK APAKAH USER ADMIN =====
+    if (auth()->user()->role !== 'admin') {
+        return redirect()->route('artikel.index')
+                ->with('error', 'Anda tidak memiliki izin untuk mengakses halaman sampah.');
     }
 
-    /**
-     * Restore a soft deleted resource.
-     */
+    $artikels = Artikel::onlyTrashed()
+        ->with(['creator', 'tags'])
+        ->orderBy('deleted_at', 'desc')
+        ->paginate(9);
+
+    return Inertia::render('home/Artikel', [
+        'mode' => 'trashed',
+        'artikels' => $artikels
+    ]);
+}
+
     public function restore($id)
-    {
+{
+    // ===== CEK APAKAH USER ADMIN =====
+    if (auth()->user()->role !== 'admin') {
+        return redirect()->route('artikel.index')
+                ->with('error', 'Anda tidak memiliki izin untuk memulihkan artikel.');
+    }
+
+    try {
         $artikel = Artikel::onlyTrashed()->findOrFail($id);
         $artikel->restore();
 
         return redirect()->route('artikel.index')
                 ->with('success', 'Artikel berhasil dipulihkan!');
+    } catch (\Exception $e) {
+        return redirect()->route('artikel.trashed')
+                ->with('error', 'Gagal memulihkan artikel: ' . $e->getMessage());
+    }
+}
+
+    public function forceDelete($id)
+{
+    // ===== CEK APAKAH USER ADMIN =====
+    if (auth()->user()->role !== 'admin') {
+        return redirect()->route('artikel.index')
+                ->with('error', 'Anda tidak memiliki izin untuk menghapus permanen.');
     }
 
-    /**
-     * Permanently delete a resource.
-     */
-    public function forceDelete($id)
-    {
+    try {
         $artikel = Artikel::onlyTrashed()->findOrFail($id);
-
-        // Detach tags terlebih dahulu
         $artikel->tags()->detach();
-
-        // Hapus permanen
         $artikel->forceDelete();
 
         return redirect()->route('artikel.trashed')
                 ->with('success', 'Artikel berhasil dihapus permanen!');
+    } catch (\Exception $e) {
+        return redirect()->route('artikel.trashed')
+                ->with('error', 'Gagal menghapus permanen: ' . $e->getMessage());
     }
-
+}
     // ===== METHOD UNTUK DATA API (Opsional) =====
     public function indexData()
     {
@@ -223,14 +240,14 @@ class ArtikelController extends Controller
         return Tag::all();
     }
 
-    public function showData($id)
+    public function showData($slug)
     {
-        return Artikel::with(['creator', 'tags'])->findOrFail($id);
+        return Artikel::with(['creator', 'tags'])->where('slug', $slug)->firstOrFail();
     }
 
-    public function editData($id)
+    public function editData($slug)
     {
-        $artikel = Artikel::with('tags')->findOrFail($id);
+        $artikel = Artikel::with('tags')->where('slug', $slug)->firstOrFail();
         return [
             'artikel' => $artikel,
             'tags' => Tag::all(),

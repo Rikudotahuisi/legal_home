@@ -24,6 +24,27 @@
           <li><a href="/contact" class="hover:text-blue-800 transition font-medium text-gray-700">Konsultasi</a></li>
           <li><a href="/legality" class="hover:text-blue-800 transition font-medium text-gray-700">Legalitas</a></li>
           
+          <!-- Admin Menu (hanya untuk admin) -->
+          <li v-if="isAdmin">
+            <div class="relative group">
+              <button class="text-yellow-600 hover:text-yellow-700 transition font-medium flex items-center gap-1">
+                <i class="fas fa-crown"></i> Admin
+                <i class="fas fa-chevron-down text-xs"></i>
+              </button>
+              <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 hidden group-hover:block">
+                <a href="/admin/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
+                  <i class="fas fa-chart-pie me-2"></i> Dashboard
+                </a>
+                <a href="/admin/tags" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
+                  <i class="fas fa-tags me-2"></i> Kelola Tags
+                </a>
+                <a href="/artikel/trashed" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
+                  <i class="fas fa-trash me-2"></i> Sampah
+                </a>
+              </div>
+            </div>
+          </li>
+          
           <!-- Auth Links -->
           <li v-if="!isLoggedIn">
             <a href="/login" class="btn-primary">Masuk</a>
@@ -33,6 +54,7 @@
               <button class="flex items-center gap-2 text-gray-700 hover:text-blue-800 transition">
                 <i class="fas fa-user-circle text-2xl"></i>
                 <span>{{ user?.name || 'User' }}</span>
+                <span v-if="isAdmin" class="text-xs bg-yellow-500 text-white px-2 py-0.5 rounded-full">Admin</span>
                 <i class="fas fa-chevron-down text-xs"></i>
               </button>
               <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 hidden group-hover:block">
@@ -62,17 +84,32 @@
           <li><a href="/contact" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">Konsultasi</a></li>
           <li><a href="/legality" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">Legalitas</a></li>
           
+          <!-- Admin Mobile -->
+          <li v-if="isAdmin" class="border-t border-gray-100 pt-3">
+            <p class="text-sm font-semibold text-yellow-600 mb-2"><i class="fas fa-crown me-2"></i> Admin Menu</p>
+            <a href="/admin/dashboard" class="block text-sm text-gray-700 hover:bg-gray-50 transition px-2 py-1 rounded" @click="mobileMenuOpen = false">
+              <i class="fas fa-chart-pie me-2"></i> Dashboard
+            </a>
+            <a href="/admin/tags" class="block text-sm text-gray-700 hover:bg-gray-50 transition px-2 py-1 rounded" @click="mobileMenuOpen = false">
+              <i class="fas fa-tags me-2"></i> Kelola Tags
+            </a>
+            <a href="/artikel/trashed" class="block text-sm text-gray-700 hover:bg-gray-50 transition px-2 py-1 rounded" @click="mobileMenuOpen = false">
+              <i class="fas fa-trash me-2"></i> Sampah
+            </a>
+          </li>
+          
           <!-- Auth Mobile -->
-          <li v-if="!isLoggedIn">
+          <li v-if="!isLoggedIn" class="border-t border-gray-100 pt-3">
             <a href="/login" class="btn-primary block text-center">Masuk</a>
           </li>
-          <li v-if="isLoggedIn">
-            <div class="border-t border-gray-100 pt-3">
-              <p class="text-sm text-gray-600 mb-2"><i class="fas fa-user me-2"></i> {{ user?.name || 'User' }}</p>
-              <button @click="logout" class="text-red-600 text-sm w-full text-left hover:text-red-800 transition">
-                <i class="fas fa-sign-out-alt me-2"></i> Keluar
-              </button>
-            </div>
+          <li v-if="isLoggedIn" class="border-t border-gray-100 pt-3">
+            <p class="text-sm text-gray-600 mb-2">
+              <i class="fas fa-user me-2"></i> {{ user?.name || 'User' }}
+              <span v-if="isAdmin" class="text-xs bg-yellow-500 text-white px-2 py-0.5 rounded-full ml-2">Admin</span>
+            </p>
+            <button @click="logout" class="text-red-600 text-sm w-full text-left hover:text-red-800 transition">
+              <i class="fas fa-sign-out-alt me-2"></i> Keluar
+            </button>
           </li>
         </ul>
       </div>
@@ -83,11 +120,8 @@
       <slot />
     </main>
 
-    <!-- ============================================ -->
-    <!-- FOOTER LENGKAP -->
-    <!-- ============================================ -->
+    <!-- Footer -->
     <footer class="bg-gray-900 text-white">
-      <!-- Main Footer -->
       <div class="container mx-auto px-4 py-16">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <!-- Kolom 1: Brand -->
@@ -180,10 +214,8 @@
           </div>
         </div>
 
-        <!-- Divider -->
         <div class="border-t border-gray-800 my-8"></div>
 
-        <!-- Bottom Footer -->
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
           <p>&copy; 2026 LegalHome. All rights reserved.</p>
           <div class="flex space-x-6">
@@ -209,10 +241,16 @@ export default {
   },
   computed: {
     isLoggedIn() {
-      return !!usePage().props.auth.user;
+      // ===== PERBAIKAN: Cek dengan aman =====
+      return !!usePage().props.auth?.user;
     },
     user() {
-      return usePage().props.auth.user;
+      // ===== PERBAIKAN: Cek dengan aman =====
+      return usePage().props.auth?.user || null;
+    },
+    isAdmin() {
+      // ===== PERBAIKAN: Cek dengan aman =====
+      return this.user?.role === 'admin';
     }
   },
   methods: {
@@ -232,10 +270,5 @@ export default {
 <style scoped>
 .btn-primary {
   @apply bg-gradient-to-r from-blue-700 to-blue-900 text-white px-5 py-2 rounded-full font-semibold hover:scale-105 transition transform inline-block;
-}
-
-/* Animasi hover untuk footer */
-footer a {
-  @apply transition-all duration-300;
 }
 </style>

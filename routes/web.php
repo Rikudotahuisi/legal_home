@@ -1,4 +1,5 @@
 <?php
+// routes/web.php
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -8,29 +9,14 @@ use App\Http\Controllers\TagController;
 use App\Models\Artikel;
 use App\Models\Tag;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-// ===== AUTH ROUTES =====
 require __DIR__.'/auth.php';
 
-Route::get('kuda', function () {
-    return view('welcome');
-});
-
-
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/legality', [App\Http\Controllers\HomeController::class, 'legality'])->name('legality');
-Route::get('/contact', [App\Http\Controllers\HomeController::class, 'contact'])->name('contact');
-Route::get('/about', [App\Http\Controllers\HomeController::class, 'about'])->name('about');
-Route::get('/galery', [App\Http\Controllers\HomeController::class, 'galery'])->name('galery');
+// ===== HALAMAN DEPAN =====
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/about', [HomeController::class, 'about'])->name('about');
+Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+Route::get('/galery', [HomeController::class, 'galery'])->name('galery');
+Route::get('/legality', [HomeController::class, 'legality'])->name('legality');
 
 // ===== ARTIKEL ROUTES =====
 Route::prefix('artikel')->group(function () {
@@ -106,15 +92,57 @@ Route::prefix('artikel')->group(function () {
         ->name('artikel.destroy');
 });
 
-    Route::prefix('tag')->group(function () {
-        Route::get('/list', [App\Http\Controllers\TagController::class, "view_list"])->name("tag-list");
-        Route::get('/create', [App\Http\Controllers\TagController::class, "view_create"])->name("create-tag");
-        Route::get('/update/{id}', [App\Http\Controllers\TagController::class, "view_update"])->name("update-tag");
-        Route::get('/show/{id}', [App\Http\Controllers\TagController::class, "view_show"])->name("show-tag");
+// ============================================================
+// ===== TAG ROUTES (Satu File Vue) =====
+// ============================================================
+Route::prefix('tag')->group(function () {
+    // ===== LIST =====
+    Route::get('/list', function () {
+        return Inertia::render('admin/Tag', [
+            'mode' => 'list',
+            'tags' => Tag::all()
+        ]);
+    })->middleware('auth')->name('tag-list');
 
-        Route::post('/list', [App\Http\Controllers\TagController::class, "post_list"])->name("list-tag-post");
-        Route::post('/delete', [App\Http\Controllers\TagController::class, "post_delete"])->name("delete-tag-post");
-        Route::post('/create', [App\Http\Controllers\TagController::class, "post_create"])->name("create-tag-post");
-        Route::post('/update/{id}', [App\Http\Controllers\TagController::class, "post_update"])->name("update-tag-post");
-    });
-	
+    // ===== CREATE =====
+    Route::get('/create', function () {
+        return Inertia::render('admin/Tag', [
+            'mode' => 'create'
+        ]);
+    })->middleware('auth')->name('create-tag');
+
+    Route::post('/create', [TagController::class, 'post_create'])
+        ->middleware('auth')
+        ->name('create-tag-post');
+
+    // ===== EDIT =====
+    Route::get('/update/{id}', function ($id) {
+        $tag = Tag::findOrFail($id);
+        return Inertia::render('admin/Tag', [
+            'mode' => 'edit',
+            'tag' => $tag
+        ]);
+    })->middleware('auth')->name('update-tag');
+
+    Route::post('/update/{id}', [TagController::class, 'post_update'])
+        ->middleware('auth')
+        ->name('update-tag-post');
+
+    // ===== DELETE =====
+    Route::post('/delete', [TagController::class, 'post_delete'])
+        ->middleware('auth')
+        ->name('delete-tag-post');
+});
+
+// ============================================================
+// ===== ADMIN DASHBOARD =====
+// ============================================================
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('admin/Dashboard', [
+            'totalArticles' => Artikel::count(),
+            'totalUsers' => \App\Models\User::count(),
+            'trashedArticles' => Artikel::onlyTrashed()->count(),
+        ]);
+    })->name('admin.dashboard');
+});

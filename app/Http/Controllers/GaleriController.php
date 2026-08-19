@@ -16,7 +16,7 @@ class GaleriController extends Controller
      */
     public function view_list($artikelId)
     {
-        $artikel = Artikel::with('galeri')->findOrFail($artikelId);
+        $artikel = Artikel::with(['galeris', 'slides'])->findOrFail($artikelId);
         return view('galeri.list', compact('artikel'));
     }
 
@@ -41,6 +41,7 @@ class GaleriController extends Controller
             'judul_gambar' => 'nullable|string|max:255',
             'tipe_media' => 'required|in:gambar,video',
             'is_cover' => 'nullable|boolean',
+            'is_slide' => 'nullable|boolean', // ← TAMBAHKAN
             'keterangan' => 'nullable|string',
         ]);
 
@@ -52,6 +53,13 @@ class GaleriController extends Controller
         // Jika dijadikan cover, update cover lainnya menjadi false
         if ($request->is_cover) {
             Galeri::where('artikel_id', $artikelId)->where('is_cover', true)->update(['is_cover' => false]);
+        }
+
+        // ===== TAMBAHKAN: Jika dijadikan slide =====
+        $slideUrutan = 0;
+        if ($request->is_slide) {
+            $slideUrutan = Galeri::where('artikel_id', $artikelId)->where('is_slide', true)->max('slide_urutan') ?? 0;
+            $slideUrutan++;
         }
 
         // Cari urutan terakhir
@@ -67,6 +75,8 @@ class GaleriController extends Controller
             'file_size' => $this->formatFileSize($file->getSize()),
             'tipe_media' => $request->tipe_media,
             'is_cover' => $request->is_cover ?? false,
+            'is_slide' => $request->is_slide ?? false, // ← TAMBAHKAN
+            'slide_urutan' => $slideUrutan, // ← TAMBAHKAN
             'urutan' => $lastOrder + 1,
             'keterangan' => $request->keterangan,
         ]);
@@ -108,6 +118,7 @@ class GaleriController extends Controller
         $request->validate([
             'judul_gambar' => 'nullable|string|max:255',
             'is_cover' => 'nullable|boolean',
+            'is_slide' => 'nullable|boolean', // ← TAMBAHKAN
             'keterangan' => 'nullable|string',
             'urutan' => 'nullable|integer|min:0',
         ]);
@@ -117,9 +128,26 @@ class GaleriController extends Controller
             Galeri::where('artikel_id', $artikelId)->where('is_cover', true)->update(['is_cover' => false]);
         }
 
+        // ===== TAMBAHKAN: Logic untuk slide =====
+        // Jika dijadikan slide (sebelumnya bukan slide)
+        if ($request->is_slide && !$galeri->is_slide) {
+            $slideUrutan = Galeri::where('artikel_id', $artikelId)
+                                ->where('is_slide', true)
+                                ->max('slide_urutan') ?? 0;
+            $galeri->slide_urutan = $slideUrutan + 1;
+        }
+
+        // Jika dihapus dari slide (sebelumnya slide)
+        if (!$request->is_slide && $galeri->is_slide) {
+            $galeri->slide_urutan = 0;
+            // Reorder slide yang tersisa
+            $this->reorderSlides($artikelId);
+        }
+
         $galeri->update([
             'judul_gambar' => $request->judul_gambar ?? $galeri->judul_gambar,
             'is_cover' => $request->is_cover ?? $galeri->is_cover,
+            'is_slide' => $request->is_slide ?? $galeri->is_slide, // ← TAMBAHKAN
             'keterangan' => $request->keterangan,
             'urutan' => $request->urutan ?? $galeri->urutan,
         ]);
@@ -155,6 +183,11 @@ class GaleriController extends Controller
             if ($newCover) {
                 $newCover->update(['is_cover' => true]);
             }
+        }
+
+        // ===== TAMBAHKAN: Jika yang dihapus adalah slide, reorder ulang =====
+        if ($galeri->is_slide) {
+            $this->reorderSlides($artikelId);
         }
 
         $galeri->delete();
@@ -213,15 +246,80 @@ class GaleriController extends Controller
     }
 
     /**
-     * Display gallery as slider for frontend
+     * Set a gallery item as slide (Toggle on/off)
      */
-    public function view_slider($artikelId)
+    public function post_set_slide(Request $request)
     {
-        $artikel = Artikel::with(['galeri' => function($query) {
-            $query->orderBy('urutan');
-        }])->findOrFail($artikelId);
+        $request->validate([
+            'id' => 'required|exists:galeris,id',
+        ]);
 
-        // Kirim ke view slider
-        return view('galeri.slider', compact('artikel'));
+        $galeri = Galeri::findOrFail($request->id);
+        $artikelId = $galeri->artikel_id;
+
+        // Toggle is_slide
+        $isSlide = !$galeri->is_slide;
+
+        if ($isSlide) {
+            // Jika dijadikan slide, cari urutan terakhir
+            $lastOrder = Galeri::where('artikel_id', $artikelId)
+                              ->where('is_slide', true)
+                              ->max('slide_urutan') ?? 0;
+
+            $galeri->update([
+                'is_slide' => true,
+                'slide_urutan' => $lastOrder + 1,
+            ]);
+        } else {
+            // Jika dihapus dari slide
+            $galeri->update([
+                'is_slide' => false,
+                'slide_urutan' => 0,
+            ]);
+
+            // Reorder slide yang tersisa
+            $this->reorderSlides($artikelId);
+        }
+
+        return redirect()->route('galeri-list', $artikelId)
+                ->with('success', $isSlide ? 'Foto berhasil ditambahkan ke slide!' : 'Foto dihapus dari slide!');
+    }
+
+    /**
+     * Reorder slides (manual ordering via drag & drop)
+     */
+    public function post_reorder_slides(Request $request)
+    {
+        $request->validate([
+            'artikel_id' => 'required|exists:artikels,id',
+            'slides' => 'required|array',
+            'slides.*.id' => 'required|exists:galeris,id',
+            'slides.*.slide_urutan' => 'required|integer|min:0',
+        ]);
+
+        foreach ($request->slides as $slide) {
+            Galeri::where('id', $slide['id'])
+                ->where('artikel_id', $request->artikel_id)
+                ->update(['slide_urutan' => $slide['slide_urutan']]);
+        }
+
+        return redirect()->route('galeri-list', $request->artikel_id)
+                ->with('success', 'Urutan slide berhasil diupdate!');
+    }
+
+    /**
+     * Reorder slides (private method - auto reorder after delete/toggle)
+     */
+    private function reorderSlides($artikelId)
+    {
+        $slides = Galeri::where('artikel_id', $artikelId)
+                    ->where('is_slide', true)
+                    ->orderBy('slide_urutan')
+                    ->get();
+
+        $urutan = 1;
+        foreach ($slides as $item) {
+            $item->update(['slide_urutan' => $urutan++]);
+        }
     }
 }

@@ -21,13 +21,17 @@ class Galeri extends Model
         'file_size',
         'tipe_media',
         'is_cover',
+        'is_slide',
+        'slide_urutan',
         'urutan',
         'keterangan',
     ];
 
     protected $casts = [
         'is_cover' => 'boolean',
+        'is_slide' => 'boolean',
         'urutan' => 'integer',
+        'slide_urutan' => 'integer',
     ];
 
     /**
@@ -76,6 +80,12 @@ class Galeri extends Model
     public function getFileUrlAttribute()
     {
         return asset('storage/' . $this->file_path);
+    }
+
+     public function scopeSlide($query)
+    {
+        return $query->where('is_slide', true)
+                    ->orderBy('slide_urutan', 'asc');
     }
 
     /**

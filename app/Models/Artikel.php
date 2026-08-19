@@ -61,6 +61,13 @@ class Artikel extends Model
                     ->where('is_cover', true);
     }
 
+    public function slides()
+    {
+        return $this->hasMany(Galeri::class, 'artikel_id')
+                    ->where('is_slide', true)
+                    ->orderBy('slide_urutan', 'asc');
+    }
+
     /**
      * Relasi ke gambar saja
      */
@@ -79,6 +86,11 @@ class Artikel extends Model
         return $this->hasMany(Galeri::class, 'artikel_id')
                     ->where('tipe_media', 'video')
                     ->orderBy('urutan', 'asc');
+    }
+
+    public function getHasSlideAttribute()
+    {
+        return $this->slides()->count() > 0;
     }
 
     /**

@@ -50,8 +50,8 @@
             </div>
             <!-- Icon Zoom -->
             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-500">
-              <div class="bg-white/80 backdrop-blur-sm rounded-full p-3">
-                <i class="fas fa-search-plus text-2xl text-blue-800"></i>
+              <div class="bg-white/80 backdrop-blur-sm rounded-full p-4 transform hover:scale-110 transition">
+                <i class="fas fa-search-plus text-3xl text-blue-800"></i>
               </div>
             </div>
           </div>
@@ -66,52 +66,71 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- LIGHTBOX MODAL -->
+    <!-- LIGHTBOX MODAL - GAMBAR LEBIH BESAR -->
     <!-- ============================================================ -->
     <div v-if="lightboxOpen" 
          class="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center"
          @click.self="closeLightbox">
+      
       <!-- Tombol Close -->
       <button @click="closeLightbox" 
-              class="absolute top-4 right-4 text-white text-3xl hover:text-yellow-400 transition z-10">
+              class="absolute top-4 right-4 text-white text-3xl hover:text-yellow-400 transition z-20 w-12 h-12 flex items-center justify-center rounded-full hover:bg-white/10">
         <i class="fas fa-times"></i>
       </button>
 
       <!-- Tombol Prev -->
       <button @click="prevImage" 
-              class="absolute left-4 text-white text-4xl hover:text-yellow-400 transition z-10 p-2">
+              class="absolute left-2 md:left-6 text-white text-4xl md:text-6xl hover:text-yellow-400 transition z-20 p-3 rounded-full hover:bg-white/10">
         <i class="fas fa-chevron-circle-left"></i>
       </button>
 
       <!-- Tombol Next -->
       <button @click="nextImage" 
-              class="absolute right-4 text-white text-4xl hover:text-yellow-400 transition z-10 p-2">
+              class="absolute right-2 md:right-6 text-white text-4xl md:text-6xl hover:text-yellow-400 transition z-20 p-3 rounded-full hover:bg-white/10">
         <i class="fas fa-chevron-circle-right"></i>
       </button>
 
-      <!-- Gambar -->
-      <div class="relative max-w-5xl max-h-[90vh] mx-12">
-        <img :src="currentImage?.image" 
-             :alt="currentImage?.title"
-             class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl">
-        
-        <!-- Info Gambar -->
-        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-lg">
-          <h3 class="text-white text-xl font-bold">{{ currentImage?.title }}</h3>
-          <p class="text-gray-300">{{ currentImage?.category }}</p>
-          <p class="text-gray-400 text-sm mt-1">
-            {{ currentIndex + 1 }} / {{ filteredGalleries.length }}
-          </p>
+      <!-- Gambar - LEBIH BESAR -->
+      <div class="relative w-full h-full flex items-center justify-center px-4 md:px-16">
+        <div class="relative max-w-7xl max-h-[92vh] w-full h-full flex items-center justify-center">
+          <img :src="currentImage?.image" 
+               :alt="currentImage?.title"
+               class="max-w-full max-h-[88vh] w-auto h-auto object-contain rounded-lg shadow-2xl"
+               style="min-width: 60%; min-height: 40%;">
+          
+          <!-- Info Gambar di Bawah -->
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 rounded-b-lg">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h3 class="text-white text-xl md:text-2xl font-bold">{{ currentImage?.title }}</h3>
+                <p class="text-gray-300">{{ currentImage?.category }}</p>
+              </div>
+              <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                <span class="text-white text-sm font-medium">
+                  {{ currentIndex + 1 }} / {{ filteredGalleries.length }}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Keyboard Navigation -->
-      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 text-sm flex items-center gap-4">
-        <span><i class="fas fa-arrow-left"></i> Prev</span>
+      <!-- Keyboard Navigation Hint -->
+      <div class="absolute bottom-20 left-1/2 -translate-x-1/2 text-white/30 text-sm flex items-center gap-6 bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full">
+        <span class="flex items-center gap-2">
+          <i class="fas fa-arrow-left"></i> 
+          <span class="hidden sm:inline">Prev</span>
+        </span>
         <span class="w-px h-4 bg-white/30"></span>
-        <span><i class="fas fa-arrow-right"></i> Next</span>
+        <span class="flex items-center gap-2">
+          <i class="fas fa-arrow-right"></i> 
+          <span class="hidden sm:inline">Next</span>
+        </span>
         <span class="w-px h-4 bg-white/30"></span>
-        <span><i class="fas fa-times"></i> Close</span>
+        <span class="flex items-center gap-2">
+          <i class="fas fa-times"></i> 
+          <span class="hidden sm:inline">Close</span>
+        </span>
       </div>
     </div>
 
@@ -225,18 +244,18 @@ export default {
       if (e.key === 'Escape') {
         this.closeLightbox();
       } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
         this.nextImage();
       } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
         this.prevImage();
       }
     }
   },
   mounted() {
-    // Tambahkan event listener untuk keyboard
     window.addEventListener('keydown', this.handleKeydown);
   },
   beforeUnmount() {
-    // Hapus event listener
     window.removeEventListener('keydown', this.handleKeydown);
   }
 }
@@ -253,12 +272,17 @@ export default {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-/* Scrollbar custom untuk body saat lightbox terbuka */
-body.no-scroll {
-  overflow: hidden;
+/* Gambar di lightbox dengan transisi halus */
+.fixed img {
+  animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 </style>

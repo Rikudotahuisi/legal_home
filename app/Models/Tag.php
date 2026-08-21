@@ -1,34 +1,36 @@
 <?php
+// app/Models/Tag.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Str;
 class Tag extends Model
 {
     use HasFactory;
 
-    /**
-     * Nama tabel yang digunakan
-     */
     protected $table = 'tags';
 
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = [
         'name',
-        'slug',
+        'slug', 
     ];
+     // ===== AUTO GENERATE SLUG =====
+    protected static function boot()
+    {
+        parent::boot();
 
-    /**
-     * Relasi many-to-many dengan Artikel
-     * melalui tabel pivot 'artikeltag'
-     */
+        static::creating(function ($tag) {
+            if (empty($tag->slug)) {
+                $tag->slug = Str::slug($tag->name);
+            }
+        });
+    }
+
+    // ===== RELASI KE ARTIKEL - PAKAI TABEL artikeltag =====
     public function artikels()
     {
-        return $this->belongsToMany(Artikel::class, 'artikeltag', 'tag_id', 'artikel_id')
-                    ->withTimestamps();
+        return $this->belongsToMany(Artikel::class, 'artikeltag', 'tag_id', 'artikel_id');
     }
 }

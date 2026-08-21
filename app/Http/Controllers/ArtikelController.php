@@ -7,18 +7,16 @@ use App\Models\Artikel;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class ArtikelController extends Controller
 {
-    /**
-     * Display a listing of the resource (untuk Inertia).
-     */
     public function index()
     {
         $artikels = Artikel::with(['creator', 'tags'])
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(9);
+            ->orderBy('created_at', 'desc')
+            ->paginate(9);
 
         return Inertia::render('home/Artikel', [
             'mode' => 'index',
@@ -27,40 +25,40 @@ class ArtikelController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $tags = Tag::all();
         
         return Inertia::render('home/Artikel', [
             'mode' => 'create',
-            'tags' => $tags
+            'tags' => $tags,
+            'canManageTags' => auth()->check() && auth()->user()->role === 'admin'
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
             'artikeltitle' => 'required|string|max:255',
             'artikelcontent' => 'required|string',
-            'slug' => 'nullable|string|unique:artikel,slug',
+            'slug' => 'nullable|string|unique:artikels,slug',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'tags' => 'nullable|array',
-            'tags.*' => 'exists:tag,id',
+            'tags.*' => 'exists:tags,id',  // <-- PERBAIKI: tags,id
         ]);
 
-        // Generate slug jika tidak diisi
+        // Generate slug
         $slug = $request->slug ?? Str::slug($request->artikeltitle);
-        
-        // Cek unique slug
         $originalSlug = $slug;
         $counter = 1;
         while (Artikel::withTrashed()->where('slug', $slug)->exists()) {
             $slug = $originalSlug . '-' . $counter++;
+        }
+
+        // Upload gambar jika ada
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = '/storage/' . $request->file('image')->store('artikel', 'public');
         }
 
         // Buat artikel
@@ -68,11 +66,12 @@ class ArtikelController extends Controller
             'artikeltitle' => $request->artikeltitle,
             'artikelcontent' => $request->artikelcontent,
             'slug' => $slug,
+            'image' => $imagePath,
             'created_by' => auth()->id(),
         ]);
 
-        // Attach tags jika ada
-        if ($request->has('tags')) {
+        // ===== ATTACH TAGS (HANYA SEKALI) =====
+        if ($request->has('tags') && !empty($request->tags)) {
             $artikel->tags()->attach($request->tags);
         }
 
@@ -80,12 +79,11 @@ class ArtikelController extends Controller
                 ->with('success', 'Artikel berhasil dibuat!');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($slug)
     {
-        $artikel = Artikel::with(['creator', 'tags'])->where('slug', $slug)->firstOrFail();
+        $artikel = Artikel::with(['creator', 'tags'])
+            ->where('slug', $slug)
+            ->firstOrFail();
 
         return Inertia::render('home/Artikel', [
             'mode' => 'show',
@@ -93,9 +91,6 @@ class ArtikelController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($slug)
     {
         $artikel = Artikel::with('tags')->where('slug', $slug)->firstOrFail();
@@ -106,13 +101,11 @@ class ArtikelController extends Controller
             'mode' => 'edit',
             'artikel' => $artikel,
             'tags' => $tags,
-            'selectedTags' => $selectedTags
+            'selectedTags' => $selectedTags,
+            'canManageTags' => auth()->check() && auth()->user()->role === 'admin'
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $slug)
     {
         $artikel = Artikel::where('slug', $slug)->firstOrFail();
@@ -120,29 +113,40 @@ class ArtikelController extends Controller
         $request->validate([
             'artikeltitle' => 'required|string|max:255',
             'artikelcontent' => 'required|string',
-            'slug' => 'nullable|string|unique:artikel,slug,' . $artikel->id,
+            'slug' => 'nullable|string|unique:artikels,slug,' . $artikel->id,
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'tags' => 'nullable|array',
-            'tags.*' => 'exists:tag,id',
+            'tags.*' => 'exists:tags,id',  // <-- PERBAIKI: tags,id
         ]);
 
-        // Generate slug jika tidak diisi
-        $slug = $request->slug ?? Str::slug($request->artikeltitle);
-        
-        // Cek unique slug
-        $originalSlug = $slug;
+        // Generate slug
+        $newSlug = $request->slug ?? Str::slug($request->artikeltitle);
+        $originalSlug = $newSlug;
         $counter = 1;
-        while (Artikel::withTrashed()->where('slug', $slug)->where('id', '!=', $artikel->id)->exists()) {
-            $slug = $originalSlug . '-' . $counter++;
+        while (Artikel::withTrashed()->where('slug', $newSlug)->where('id', '!=', $artikel->id)->exists()) {
+            $newSlug = $originalSlug . '-' . $counter++;
+        }
+
+        // Upload gambar baru jika ada
+        $imagePath = $artikel->image;
+        if ($request->hasFile('image')) {
+            // Hapus gambar lama
+            if ($artikel->image) {
+                $oldImage = str_replace('/storage/', '', $artikel->image);
+                Storage::disk('public')->delete($oldImage);
+            }
+            $imagePath = '/storage/' . $request->file('image')->store('artikel', 'public');
         }
 
         // Update artikel
         $artikel->update([
             'artikeltitle' => $request->artikeltitle,
             'artikelcontent' => $request->artikelcontent,
-            'slug' => $slug,
+            'slug' => $newSlug,
+            'image' => $imagePath,
         ]);
 
-        // Sync tags
+        // ===== SYNC TAGS =====
         if ($request->has('tags')) {
             $artikel->tags()->sync($request->tags);
         } else {
@@ -153,113 +157,58 @@ class ArtikelController extends Controller
                 ->with('success', 'Artikel berhasil diperbarui!');
     }
 
-    /**
-     * Remove the specified resource from storage (Soft Delete).
-     */
     public function destroy($slug)
     {
         $artikel = Artikel::where('slug', $slug)->firstOrFail();
+        
+        // Hapus gambar jika ada
+        if ($artikel->image) {
+            $imagePath = str_replace('/storage/', '', $artikel->image);
+            Storage::disk('public')->delete($imagePath);
+        }
+        
         $artikel->delete();
 
         return redirect()->route('artikel.index')
                 ->with('success', 'Artikel berhasil dihapus!');
     }
 
-    /**
-     * Display a listing of trashed (soft deleted) resources.
-     */
-    public function trashed()
-{
-    // ===== CEK APAKAH USER ADMIN =====
-    if (auth()->user()->role !== 'admin') {
-        return redirect()->route('artikel.index')
-                ->with('error', 'Anda tidak memiliki izin untuk mengakses halaman sampah.');
-    }
-
-    $artikels = Artikel::onlyTrashed()
-        ->with(['creator', 'tags'])
-        ->orderBy('deleted_at', 'desc')
-        ->paginate(9);
-
-    return Inertia::render('home/Artikel', [
-        'mode' => 'trashed',
-        'artikels' => $artikels
-    ]);
-}
-
     public function restore($id)
-{
-    // ===== CEK APAKAH USER ADMIN =====
-    if (auth()->user()->role !== 'admin') {
-        return redirect()->route('artikel.index')
-                ->with('error', 'Anda tidak memiliki izin untuk memulihkan artikel.');
-    }
-
-    try {
+    {
         $artikel = Artikel::onlyTrashed()->findOrFail($id);
         $artikel->restore();
 
         return redirect()->route('artikel.index')
                 ->with('success', 'Artikel berhasil dipulihkan!');
-    } catch (\Exception $e) {
-        return redirect()->route('artikel.trashed')
-                ->with('error', 'Gagal memulihkan artikel: ' . $e->getMessage());
     }
-}
 
     public function forceDelete($id)
-{
-    // ===== CEK APAKAH USER ADMIN =====
-    if (auth()->user()->role !== 'admin') {
-        return redirect()->route('artikel.index')
-                ->with('error', 'Anda tidak memiliki izin untuk menghapus permanen.');
-    }
-
-    try {
+    {
         $artikel = Artikel::onlyTrashed()->findOrFail($id);
+        
+        // Hapus gambar jika ada
+        if ($artikel->image) {
+            $imagePath = str_replace('/storage/', '', $artikel->image);
+            Storage::disk('public')->delete($imagePath);
+        }
+        
         $artikel->tags()->detach();
         $artikel->forceDelete();
 
         return redirect()->route('artikel.trashed')
                 ->with('success', 'Artikel berhasil dihapus permanen!');
-    } catch (\Exception $e) {
-        return redirect()->route('artikel.trashed')
-                ->with('error', 'Gagal menghapus permanen: ' . $e->getMessage());
-    }
-}
-    // ===== METHOD UNTUK DATA API (Opsional) =====
-    public function indexData()
-    {
-        return Artikel::with(['creator', 'tags'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(9);
     }
 
-    public function getTags()
+    public function trashed()
     {
-        return Tag::all();
-    }
-
-    public function showData($slug)
-    {
-        return Artikel::with(['creator', 'tags'])->where('slug', $slug)->firstOrFail();
-    }
-
-    public function editData($slug)
-    {
-        $artikel = Artikel::with('tags')->where('slug', $slug)->firstOrFail();
-        return [
-            'artikel' => $artikel,
-            'tags' => Tag::all(),
-            'selectedTags' => $artikel->tags->pluck('id')->toArray()
-        ];
-    }
-
-    public function trashedData()
-    {
-        return Artikel::onlyTrashed()
+        $artikels = Artikel::onlyTrashed()
             ->with(['creator', 'tags'])
             ->orderBy('deleted_at', 'desc')
             ->paginate(9);
+
+        return Inertia::render('home/Artikel', [
+            'mode' => 'trashed',
+            'artikels' => $artikels
+        ]);
     }
 }

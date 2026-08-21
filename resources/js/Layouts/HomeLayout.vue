@@ -41,6 +41,9 @@
                 <a href="/artikel/trashed" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
                   <i class="fas fa-trash me-2"></i> Sampah
                 </a>
+                <a href="/galery/create" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
+                  <i class="fas fa-plus me-2"></i> Tambah Foto
+                </a>
               </div>
             </div>
           </li>

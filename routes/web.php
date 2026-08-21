@@ -8,6 +8,7 @@ use App\Http\Controllers\ArtikelController;
 use App\Http\Controllers\TagController;
 use App\Models\Artikel;
 use App\Models\Tag;
+use App\Http\Controllers\GaleriController;
 
 require __DIR__.'/auth.php';
 
@@ -15,8 +16,8 @@ require __DIR__.'/auth.php';
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
-Route::get('/galery', [HomeController::class, 'galery'])->name('galery');
 Route::get('/legality', [HomeController::class, 'legality'])->name('legality');
+
 
 // ===== ARTIKEL ROUTES =====
 Route::prefix('artikel')->group(function () {
@@ -91,6 +92,18 @@ Route::prefix('artikel')->group(function () {
         ->middleware('auth')
         ->name('artikel.destroy');
 });
+
+// ============================================================
+// ===== GALERI ROUTES =====
+// ============================================================
+Route::get('/galery', [GaleriController::class, 'index'])->name('galery');
+
+// ===== ROUTE KHUSUS ADMIN BUAT GALERI =====
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/galery/create', [GaleriController::class, 'create'])->name('galery.create');
+    Route::post('/galery', [GaleriController::class, 'store'])->name('galery.store');
+    Route::delete('/galery/{id}', [GaleriController::class, 'destroy'])->name('galery.destroy');
+}); 
 
 // ============================================================
 // ===== TAG ROUTES (Satu File Vue) =====

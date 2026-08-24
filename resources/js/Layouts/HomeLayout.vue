@@ -17,12 +17,12 @@
 
         <!-- Desktop Menu -->
         <ul class="hidden lg:flex space-x-8 items-center">
-          <li><a href="/" class="hover:text-blue-800 transition font-medium text-gray-700">Beranda</a></li>
-          <li><a href="/about" class="hover:text-blue-800 transition font-medium text-gray-700">Tentang Kami</a></li>
-          <li><a href="/artikel" class="hover:text-blue-800 transition font-medium text-gray-700">Artikel Hukum</a></li>
-          <li><a href="/galery" class="hover:text-blue-800 transition font-medium text-gray-700">Dokumentasi</a></li>
-          <li><a href="/contact" class="hover:text-blue-800 transition font-medium text-gray-700">Konsultasi</a></li>
-          <li><a href="/legality" class="hover:text-blue-800 transition font-medium text-gray-700">Legalitas</a></li>
+          <li><a href="/" class="hover:text-blue-800 transition font-medium text-gray-700">Home</a></li>
+          <li><a href="/about" class="hover:text-blue-800 transition font-medium text-gray-700">About Us</a></li>
+          <li><a href="/artikel" class="hover:text-blue-800 transition font-medium text-gray-700">Article</a></li>
+          <li><a href="/galery" class="hover:text-blue-800 transition font-medium text-gray-700">Gallery</a></li>
+          <li><a href="/contact" class="hover:text-blue-800 transition font-medium text-gray-700">Contact</a></li>
+          <li><a href="/legality" class="hover:text-blue-800 transition font-medium text-gray-700">Legality</a></li>
           
           <!-- Admin Menu (hanya untuk admin) -->
           <li v-if="isAdmin">
@@ -36,13 +36,13 @@
                   <i class="fas fa-chart-pie me-2"></i> Dashboard
                 </a>
                 <a href="/admin/tags" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
-                  <i class="fas fa-tags me-2"></i> Kelola Tags
+                  <i class="fas fa-tags me-2"></i> Manage Tags
                 </a>
                 <a href="/artikel/trashed" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
-                  <i class="fas fa-trash me-2"></i> Sampah
+                  <i class="fas fa-trash me-2"></i> Trashed Article
                 </a>
                 <a href="/galery/create" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
-                  <i class="fas fa-plus me-2"></i> Tambah Foto
+                  <i class="fas fa-plus me-2"></i> Add Photo
                 </a>
               </div>
             </div>
@@ -50,7 +50,7 @@
           
           <!-- Auth Links -->
           <li v-if="!isLoggedIn">
-            <a href="/login" class="btn-primary">Masuk</a>
+            <a href="/login" class="btn-primary">Login</a>
           </li>
           <li v-if="isLoggedIn">
             <div class="relative group">
@@ -62,14 +62,14 @@
               </button>
               <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 hidden group-hover:block">
                 <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
-                  <i class="fas fa-user me-2"></i> Profil
+                  <i class="fas fa-user me-2"></i> Profile
                 </a>
                 <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
-                  <i class="fas fa-cog me-2"></i> Pengaturan
+                  <i class="fas fa-cog me-2"></i> Settings
                 </a>
                 <hr class="my-1 border-gray-100">
                 <button @click="logout" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 transition">
-                  <i class="fas fa-sign-out-alt me-2"></i> Keluar
+                  <i class="fas fa-sign-out-alt me-2"></i> Logout
                 </button>
               </div>
             </div>

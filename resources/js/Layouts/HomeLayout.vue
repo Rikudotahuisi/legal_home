@@ -18,7 +18,7 @@
         <!-- Desktop Menu -->
         <ul class="hidden lg:flex space-x-8 items-center">
           <li><a href="/" class="hover:text-blue-800 transition font-medium text-gray-700">Home</a></li>
-          <li><a href="/about" class="hover:text-blue-800 transition font-medium text-gray-700">About Us</a></li>
+          <li><a href="/about" class="hover:text-blue-800 transition font-medium text-gray-700">About</a></li>
           <li><a href="/artikel" class="hover:text-blue-800 transition font-medium text-gray-700">Article</a></li>
           <li><a href="/galery" class="hover:text-blue-800 transition font-medium text-gray-700">Gallery</a></li>
           <li><a href="/contact" class="hover:text-blue-800 transition font-medium text-gray-700">Contact</a></li>
@@ -26,23 +26,28 @@
           
           <!-- Admin Menu (hanya untuk admin) -->
           <li v-if="isAdmin">
-            <div class="relative group">
-              <button class="text-yellow-600 hover:text-yellow-700 transition font-medium flex items-center gap-1">
-                <i class="fas fa-crown"></i> Admin
-                <i class="fas fa-chevron-down text-xs"></i>
+            <div class="relative">
+              <!-- ===== DROPDOWN BUTTON - LEBIH MUDAH DIKLIK ===== -->
+              <button @click="toggleAdminDropdown" 
+                      class="text-yellow-600 hover:text-yellow-700 transition font-medium flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-yellow-50">
+                <i class="fas fa-crown"></i> 
+                <span>Admin</span>
+                <i class="fas fa-chevron-down text-xs transition-transform" 
+                   :class="adminDropdownOpen ? 'rotate-180' : ''"></i>
               </button>
-              <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 hidden group-hover:block">
-                <a href="/admin/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
+              
+              <!-- ===== DROPDOWN MENU ===== -->
+              <div v-show="adminDropdownOpen" 
+                   @mouseleave="adminDropdownOpen = false"
+                   class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+                <a href="/admin/dashboard" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
                   <i class="fas fa-chart-pie me-2"></i> Dashboard
                 </a>
-                <a href="/tag/list" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
+                <a href="/tag/list" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
                   <i class="fas fa-tags me-2"></i> Manage Tags
                 </a>
-                <a href="/artikel/trashed" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
-                  <i class="fas fa-trash me-2"></i> Trashed Article
-                </a>
-                <a href="/galery/create" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
-                  <i class="fas fa-plus me-2"></i> Add Photo
+                <a href="/artikel/trashed" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
+                  <i class="fas fa-trash me-2"></i> Trash
                 </a>
               </div>
             </div>
@@ -50,25 +55,32 @@
           
           <!-- Auth Links -->
           <li v-if="!isLoggedIn">
-            <a href="/login" class="btn-primary">Login</a>
+            <a href="/login" class="btn-primary">Masuk</a>
           </li>
           <li v-if="isLoggedIn">
-            <div class="relative group">
-              <button class="flex items-center gap-2 text-gray-700 hover:text-blue-800 transition">
+            <div class="relative">
+              <!-- ===== DROPDOWN BUTTON USER ===== -->
+              <button @click="toggleUserDropdown" 
+                      class="flex items-center gap-2 text-gray-700 hover:text-blue-800 transition px-3 py-2 rounded-lg hover:bg-blue-50">
                 <i class="fas fa-user-circle text-2xl"></i>
                 <span>{{ user?.name || 'User' }}</span>
                 <span v-if="isAdmin" class="text-xs bg-yellow-500 text-white px-2 py-0.5 rounded-full">Admin</span>
-                <i class="fas fa-chevron-down text-xs"></i>
+                <i class="fas fa-chevron-down text-xs transition-transform" 
+                   :class="userDropdownOpen ? 'rotate-180' : ''"></i>
               </button>
-              <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 hidden group-hover:block">
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
+              
+              <!-- ===== DROPDOWN MENU USER ===== -->
+              <div v-show="userDropdownOpen" 
+                   @mouseleave="userDropdownOpen = false"
+                   class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+                <a href="#" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
                   <i class="fas fa-user me-2"></i> Profile
                 </a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
+                <a href="#" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
                   <i class="fas fa-cog me-2"></i> Settings
                 </a>
                 <hr class="my-1 border-gray-100">
-                <button @click="logout" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 transition">
+                <button @click="logout" class="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition">
                   <i class="fas fa-sign-out-alt me-2"></i> Logout
                 </button>
               </div>
@@ -80,30 +92,30 @@
       <!-- Mobile Menu -->
       <div v-show="mobileMenuOpen" class="lg:hidden bg-white border-t">
         <ul class="flex flex-col p-4 space-y-3">
-          <li><a href="/" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">Beranda</a></li>
-          <li><a href="/about" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">Tentang Kami</a></li>
-          <li><a href="/artikel" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">Artikel Hukum</a></li>
-          <li><a href="/galery" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">Dokumentasi</a></li>
-          <li><a href="/contact" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">Konsultasi</a></li>
-          <li><a href="/legality" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">Legalitas</a></li>
+          <li><a href="/" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">Home</a></li>
+          <li><a href="/about" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">About</a></li>
+          <li><a href="/artikel" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">Article</a></li>
+          <li><a href="/galery" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">Gallery</a></li>
+          <li><a href="/contact" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">Contact</a></li>
+          <li><a href="/legality" class="block hover:text-blue-800 transition font-medium" @click="mobileMenuOpen = false">Legality</a></li>
           
           <!-- Admin Mobile -->
           <li v-if="isAdmin" class="border-t border-gray-100 pt-3">
             <p class="text-sm font-semibold text-yellow-600 mb-2"><i class="fas fa-crown me-2"></i> Admin Menu</p>
-            <a href="/admin/dashboard" class="block text-sm text-gray-700 hover:bg-gray-50 transition px-2 py-1 rounded" @click="mobileMenuOpen = false">
+            <a href="/admin/dashboard" class="block text-sm text-gray-700 hover:bg-gray-50 transition px-2 py-1.5 rounded" @click="mobileMenuOpen = false">
               <i class="fas fa-chart-pie me-2"></i> Dashboard
             </a>
-            <a href="/tag/list" class="block text-sm text-gray-700 hover:bg-gray-50 transition px-2 py-1 rounded" @click="mobileMenuOpen = false">
-              <i class="fas fa-tags me-2"></i> Kelola Tags
+            <a href="/tag/list" class="block text-sm text-gray-700 hover:bg-gray-50 transition px-2 py-1.5 rounded" @click="mobileMenuOpen = false">
+              <i class="fas fa-tags me-2"></i> Manage Tags
             </a>
-            <a href="/artikel/trashed" class="block text-sm text-gray-700 hover:bg-gray-50 transition px-2 py-1 rounded" @click="mobileMenuOpen = false">
-              <i class="fas fa-trash me-2"></i> Sampah
+            <a href="/artikel/trashed" class="block text-sm text-gray-700 hover:bg-gray-50 transition px-2 py-1.5 rounded" @click="mobileMenuOpen = false">
+              <i class="fas fa-trash me-2"></i> Trash
             </a>
           </li>
           
           <!-- Auth Mobile -->
           <li v-if="!isLoggedIn" class="border-t border-gray-100 pt-3">
-            <a href="/login" class="btn-primary block text-center">Masuk</a>
+            <a href="/login" class="btn-primary block text-center">Login</a>
           </li>
           <li v-if="isLoggedIn" class="border-t border-gray-100 pt-3">
             <p class="text-sm text-gray-600 mb-2">
@@ -111,7 +123,7 @@
               <span v-if="isAdmin" class="text-xs bg-yellow-500 text-white px-2 py-0.5 rounded-full ml-2">Admin</span>
             </p>
             <button @click="logout" class="text-red-600 text-sm w-full text-left hover:text-red-800 transition">
-              <i class="fas fa-sign-out-alt me-2"></i> Keluar
+              <i class="fas fa-sign-out-alt me-2"></i> Logout
             </button>
           </li>
         </ul>
@@ -239,24 +251,36 @@ export default {
   name: 'HomeLayout',
   data() {
     return {
-      mobileMenuOpen: false
+      mobileMenuOpen: false,
+      adminDropdownOpen: false,
+      userDropdownOpen: false
     }
   },
   computed: {
     isLoggedIn() {
-      // ===== PERBAIKAN: Cek dengan aman =====
       return !!usePage().props.auth?.user;
     },
     user() {
-      // ===== PERBAIKAN: Cek dengan aman =====
       return usePage().props.auth?.user || null;
     },
     isAdmin() {
-      // ===== PERBAIKAN: Cek dengan aman =====
       return this.user?.role === 'admin';
     }
   },
   methods: {
+    // ===== TOGGLE DROPDOWN =====
+    toggleAdminDropdown() {
+      this.adminDropdownOpen = !this.adminDropdownOpen;
+      // Tutup dropdown user jika terbuka
+      if (this.userDropdownOpen) this.userDropdownOpen = false;
+    },
+    toggleUserDropdown() {
+      this.userDropdownOpen = !this.userDropdownOpen;
+      // Tutup dropdown admin jika terbuka
+      if (this.adminDropdownOpen) this.adminDropdownOpen = false;
+    },
+    
+    // ===== LOGOUT =====
     logout() {
       if (confirm('Apakah Anda yakin ingin keluar?')) {
         this.$inertia.post('/logout', {}, {
@@ -265,7 +289,27 @@ export default {
           }
         });
       }
+    },
+
+    // ===== CLOSE DROPDOWN SAAT KLIK DI LUAR =====
+    handleClickOutside(event) {
+      const adminDropdown = document.querySelector('.admin-dropdown');
+      const userDropdown = document.querySelector('.user-dropdown');
+      
+      if (adminDropdown && !adminDropdown.contains(event.target)) {
+        this.adminDropdownOpen = false;
+      }
+      if (userDropdown && !userDropdown.contains(event.target)) {
+        this.userDropdownOpen = false;
+      }
     }
+  },
+  mounted() {
+    // Tambahkan event listener untuk klik di luar dropdown
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
   }
 }
 </script>
@@ -273,5 +317,21 @@ export default {
 <style scoped>
 .btn-primary {
   @apply bg-gradient-to-r from-blue-700 to-blue-900 text-white px-5 py-2 rounded-full font-semibold hover:scale-105 transition transform inline-block;
+}
+
+/* Animasi dropdown */
+.absolute {
+  animation: dropdownFade 0.2s ease;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

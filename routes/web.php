@@ -9,6 +9,7 @@ use App\Http\Controllers\TagController;
 use App\Models\Artikel;
 use App\Models\Tag;
 use App\Http\Controllers\GaleriController;
+use App\Http\Controllers\AdminController;
 
 require __DIR__.'/auth.php';
 
@@ -139,15 +140,7 @@ Route::prefix('tag')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/delete', [TagController::class, 'post_delete'])->name('delete-tag-post');
 });
 
-// ============================================================
 // ===== ADMIN DASHBOARD =====
-// ============================================================
-Route::prefix('admin')->middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('admin/Dashboard', [
-            'totalArticles' => Artikel::count(),
-            'totalUsers' => \App\Models\User::count(),
-            'trashedArticles' => Artikel::onlyTrashed()->count(),
-        ]);
-    })->name('admin.dashboard');
+Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 });

@@ -1,7 +1,7 @@
 <!-- resources/js/Pages/admin/Tag.vue -->
 <template>
   <HomeLayout>
-    <!-- ========== HERO SECTION ========== -->
+    <!-- Hero Section -->
     <section class="relative py-16 md:py-24 bg-gradient-to-r from-blue-950 via-blue-800 to-gray-900 text-white overflow-hidden">
       <div class="absolute inset-0 opacity-10">
         <div class="absolute top-0 right-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
@@ -9,7 +9,7 @@
       </div>
       <div class="container mx-auto px-4 relative z-10 text-center">
         <span class="inline-block bg-yellow-400/20 text-yellow-400 px-4 py-1 rounded-full text-sm font-semibold mb-4">
-          <i class="fas fa-tags me-2"></i> 
+          <i class="fas fa-tags me-2"></i>
           <span v-if="mode === 'list'">Kelola Tags</span>
           <span v-else-if="mode === 'create'">Tambah Tag</span>
           <span v-else-if="mode === 'edit'">Edit Tag</span>
@@ -46,7 +46,7 @@
             <div v-if="tags && tags.length > 0" class="flex flex-wrap gap-3">
               <div v-for="tag in tags" :key="tag.id" 
                    class="group flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-800 px-4 py-2 rounded-full transition">
-                <span class="font-medium">{{ tag.nametag }}</span>
+                <span class="font-medium">{{ tag.name }}</span>
                 <button @click="switchMode('edit', tag.id)" 
                         class="text-blue-500 hover:text-blue-700 transition opacity-0 group-hover:opacity-100">
                   <i class="fas fa-edit"></i>
@@ -64,13 +64,13 @@
                 <i class="fas fa-plus me-2"></i> Tambah Tag
               </button>
             </div>
-          </div>
 
-          <!-- Tombol Kembali ke Artikel -->
-          <div class="mt-6 text-center">
-            <a href="/artikel" class="text-blue-700 hover:text-blue-900 transition inline-flex items-center">
-              <i class="fas fa-arrow-left me-2"></i> Kembali ke Artikel
-            </a>
+            <!-- Tombol Kembali -->
+            <div class="mt-6 text-center">
+              <a href="/artikel" class="text-blue-700 hover:text-blue-900 transition inline-flex items-center">
+                <i class="fas fa-arrow-left me-2"></i> Kembali ke Artikel
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -94,11 +94,11 @@
             <form @submit.prevent="submitCreate">
               <div class="mb-4">
                 <label class="block text-sm font-medium mb-1">Nama Tag <span class="text-red-500">*</span></label>
-                <input type="text" v-model="createForm.nametag" required
+                <input type="text" v-model="createForm.name" required
                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                        placeholder="Contoh: Hukum Bisnis">
-                <p v-if="createForm.errors.nametag" class="text-red-500 text-sm mt-1">
-                  {{ createForm.errors.nametag }}
+                <p v-if="createForm.errors.name" class="text-red-500 text-sm mt-1">
+                  {{ createForm.errors.name }}
                 </p>
               </div>
 
@@ -120,7 +120,7 @@
     </template>
 
     <!-- ========== MODE EDIT ========== -->
-    <template v-else-if="mode === 'edit' && selectedTag">
+    <template v-else-if="mode === 'edit' && tag">
       <section class="py-16 md:py-20 bg-gray-50">
         <div class="container mx-auto px-4 max-w-2xl">
           <div class="bg-white rounded-2xl shadow-md p-6 md:p-8">
@@ -137,10 +137,10 @@
             <form @submit.prevent="submitEdit">
               <div class="mb-4">
                 <label class="block text-sm font-medium mb-1">Nama Tag <span class="text-red-500">*</span></label>
-                <input type="text" v-model="editForm.nametag" required
+                <input type="text" v-model="editForm.name" required
                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-                <p v-if="editForm.errors.nametag" class="text-red-500 text-sm mt-1">
-                  {{ editForm.errors.nametag }}
+                <p v-if="editForm.errors.name" class="text-red-500 text-sm mt-1">
+                  {{ editForm.errors.name }}
                 </p>
               </div>
 
@@ -161,7 +161,7 @@
       </section>
     </template>
 
-    <!-- ========== CTA ========== -->
+    <!-- CTA -->
     <section class="py-16 bg-gradient-to-r from-blue-900 to-blue-700 text-white">
       <div class="container mx-auto px-4 text-center">
         <h3 class="text-2xl font-bold mb-2">Butuh Bantuan?</h3>
@@ -175,14 +175,13 @@
 </template>
 
 <script>
-import { useForm, usePage } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import HomeLayout from '@/Layouts/HomeLayout.vue';
 
 export default {
   name: 'TagManager',
   components: { HomeLayout },
   props: {
-    // Data dari server
     tags: {
       type: Array,
       default: () => []
@@ -193,25 +192,21 @@ export default {
     },
     mode: {
       type: String,
-      default: 'list' // list | create | edit
+      default: 'list'
     }
   },
   data() {
     return {
       loading: false,
-      selectedTag: this.tag || null,
-      // Form Create
       createForm: useForm({
-        nametag: ''
+        name: ''
       }),
-      // Form Edit
       editForm: useForm({
-        nametag: this.tag?.nametag || ''
+        name: this.tag?.name || ''
       })
     }
   },
   methods: {
-    // ========== SWITCH MODE ==========
     switchMode(mode, id = null) {
       if (mode === 'list') {
         window.location.href = '/tag/list';
@@ -222,7 +217,6 @@ export default {
       }
     },
 
-    // ========== CREATE TAG ==========
     submitCreate() {
       this.loading = true;
       this.createForm.post('/tag/create', {
@@ -237,7 +231,6 @@ export default {
       });
     },
 
-    // ========== EDIT TAG ==========
     submitEdit() {
       this.loading = true;
       this.editForm.post(`/tag/update/${this.tag.id}`, {
@@ -252,7 +245,6 @@ export default {
       });
     },
 
-    // ========== DELETE TAG ==========
     deleteTag(id) {
       if (confirm('Apakah Anda yakin ingin menghapus tag ini?')) {
         this.$inertia.post('/tag/delete', { id }, {

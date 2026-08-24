@@ -105,46 +105,38 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/galery/{id}', [GaleriController::class, 'destroy'])->name('galery.destroy');
 }); 
 
-// ============================================================
-// ===== TAG ROUTES (Satu File Vue) =====
-// ============================================================
-Route::prefix('tag')->group(function () {
-    // ===== LIST =====
+// ===== TAG ROUTES (ADMIN ONLY) =====
+Route::prefix('tag')->middleware(['auth', 'role:admin'])->group(function () {
+    // ===== LIST TAGS =====
     Route::get('/list', function () {
         return Inertia::render('admin/Tag', [
             'mode' => 'list',
             'tags' => Tag::all()
         ]);
-    })->middleware('auth')->name('tag-list');
+    })->name('tag-list');
 
-    // ===== CREATE =====
+    // ===== CREATE TAG =====
     Route::get('/create', function () {
         return Inertia::render('admin/Tag', [
             'mode' => 'create'
         ]);
-    })->middleware('auth')->name('create-tag');
+    })->name('create-tag');
 
-    Route::post('/create', [TagController::class, 'post_create'])
-        ->middleware('auth')
-        ->name('create-tag-post');
+    Route::post('/create', [TagController::class, 'post_create'])->name('create-tag-post');
 
-    // ===== EDIT =====
+    // ===== EDIT TAG =====
     Route::get('/update/{id}', function ($id) {
         $tag = Tag::findOrFail($id);
         return Inertia::render('admin/Tag', [
             'mode' => 'edit',
             'tag' => $tag
         ]);
-    })->middleware('auth')->name('update-tag');
+    })->name('update-tag');
 
-    Route::post('/update/{id}', [TagController::class, 'post_update'])
-        ->middleware('auth')
-        ->name('update-tag-post');
+    Route::post('/update/{id}', [TagController::class, 'post_update'])->name('update-tag-post');
 
-    // ===== DELETE =====
-    Route::post('/delete', [TagController::class, 'post_delete'])
-        ->middleware('auth')
-        ->name('delete-tag-post');
+    // ===== DELETE TAG =====
+    Route::post('/delete', [TagController::class, 'post_delete'])->name('delete-tag-post');
 });
 
 // ============================================================

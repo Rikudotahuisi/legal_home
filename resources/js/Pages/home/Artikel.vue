@@ -378,30 +378,37 @@
                         class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"></textarea>
             </div>
 
-            <!-- Tags -->
+            <!-- ===== TAGS SECTION ===== -->
             <div class="mb-6">
-              <div class="flex items-center justify-between mb-2">
-                <label class="block text-sm font-medium">Tags</label>
-                <a v-if="canManageTags" href="/tag/list" 
-                   class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-full transition">
-                  <i class="fas fa-cog me-1"></i> Kelola Tags
-                </a>
-              </div>
-              <div v-if="tags && tags.length > 0" class="flex flex-wrap gap-3">
-                <label v-for="tag in tags" :key="tag.id" 
-                       class="flex items-center gap-2 cursor-pointer bg-gray-100 px-4 py-2 rounded-full hover:bg-gray-200 transition border-2"
-                       :class="editForm.tags.includes(tag.id) ? 'border-blue-500 bg-blue-50' : 'border-transparent'">
-                  <input type="checkbox" :value="tag.id" v-model="editForm.tags" class="hidden">
-                  <span class="text-sm">{{ tag.name }}</span>
-                  <span v-if="editForm.tags.includes(tag.id)" class="text-blue-600">
-                    <i class="fas fa-check-circle"></i>
-                  </span>
-                </label>
-              </div>
-              <p v-else class="text-sm text-gray-400 bg-gray-50 p-3 rounded-xl">
-                <i class="fas fa-info-circle me-1"></i> Belum ada tags.
-              </p>
-            </div>
+            <div class="flex items-center justify-between mb-2">
+           <label class="block text-sm font-medium">Tags</label>
+    
+           <!-- ===== TOMBOL KELOLA TAGS (ADMIN ONLY) ===== -->
+          <a v-if="canManageTags" href="/tag/list" 
+           class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-full transition inline-flex items-center">
+           <i class="fas fa-cog me-1"></i> Kelola Tags
+          </a>
+          </div>
+  
+          <!-- Daftar Tags (Checkbox) -->
+          <div v-if="tags && tags.length > 0" class="flex flex-wrap gap-3">
+          <label v-for="tag in tags" :key="tag.id" 
+           class="flex items-center gap-2 cursor-pointer bg-gray-100 px-4 py-2 rounded-full hover:bg-gray-200 transition border-2"
+           :class="createForm.tags.includes(tag.id) ? 'border-blue-500 bg-blue-50' : 'border-transparent'">
+          <input type="checkbox" :value="tag.id" v-model="createForm.tags" class="hidden">
+          <span class="text-sm">{{ tag.name }}</span>
+          <span v-if="createForm.tags.includes(tag.id)" class="text-blue-600">
+          <i class="fas fa-check-circle"></i>
+       </span>
+      </label>
+    </div>
+  
+          <p v-else class="text-sm text-gray-400 bg-gray-50 p-3 rounded-xl">
+          <i class="fas fa-info-circle me-1"></i> Belum ada tags. 
+          <a v-if="canManageTags" href="/tag/create" class="text-blue-700 hover:underline">Tambahkan di sini</a>
+         <span v-else>Hubungi admin untuk menambahkan tags.</span>
+        </p>
+      </div>
 
             <!-- Tombol -->
             <div class="flex flex-wrap gap-4 pt-4 border-t border-gray-200">

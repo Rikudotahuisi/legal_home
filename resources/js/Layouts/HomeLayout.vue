@@ -35,7 +35,7 @@
                 <a href="/admin/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
                   <i class="fas fa-chart-pie me-2"></i> Dashboard
                 </a>
-                <a href="/admin/tags" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
+                <a href="/tag/list" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
                   <i class="fas fa-tags me-2"></i> Manage Tags
                 </a>
                 <a href="/artikel/trashed" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
@@ -93,7 +93,7 @@
             <a href="/admin/dashboard" class="block text-sm text-gray-700 hover:bg-gray-50 transition px-2 py-1 rounded" @click="mobileMenuOpen = false">
               <i class="fas fa-chart-pie me-2"></i> Dashboard
             </a>
-            <a href="/admin/tags" class="block text-sm text-gray-700 hover:bg-gray-50 transition px-2 py-1 rounded" @click="mobileMenuOpen = false">
+            <a href="/tag/list" class="block text-sm text-gray-700 hover:bg-gray-50 transition px-2 py-1 rounded" @click="mobileMenuOpen = false">
               <i class="fas fa-tags me-2"></i> Kelola Tags
             </a>
             <a href="/artikel/trashed" class="block text-sm text-gray-700 hover:bg-gray-50 transition px-2 py-1 rounded" @click="mobileMenuOpen = false">

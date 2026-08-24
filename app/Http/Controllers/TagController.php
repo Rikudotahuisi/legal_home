@@ -1,46 +1,41 @@
 <?php
+// app/Http/Controllers/TagController.php
 
 namespace App\Http\Controllers;
 
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use inertia\Inertia;
+use Inertia\Inertia;
 
 class TagController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    // ===== LIST TAGS =====
+    public function view_list()
     {
-        $tags = Tag::withCount('artikels')
-                    ->orderBy('name')
-                    ->paginate(10);
-
-        return view('tag.index', compact('tags'));
+        $tags = Tag::all();
+        return Inertia::render('admin/Tag', [
+            'mode' => 'list',
+            'tags' => $tags
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // ===== CREATE TAG =====
+    public function view_create()
     {
-        return view('tag.create');
+        return Inertia::render('admin/Tag', [
+            'mode' => 'create'
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function post_create(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:tag,name',
+            'name' => 'required|string|max:255|unique:tags,name'
         ]);
 
+        // ===== GENERATE SLUG =====
         $slug = Str::slug($request->name);
-
-        // Cek unique slug
         $originalSlug = $slug;
         $counter = 1;
         while (Tag::where('slug', $slug)->exists()) {
@@ -52,42 +47,30 @@ class TagController extends Controller
             'slug' => $slug,
         ]);
 
-        return redirect()->route('tag.index')
-                ->with('success', 'Tag berhasil dibuat!');
+        return redirect()->route('tag-list')
+                ->with('success', 'Tag berhasil ditambahkan!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        $tag = Tag::with('artikels')->findOrFail($id);
-        return view('tag.show', compact('tag'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    // ===== EDIT TAG =====
+    public function view_update($id)
     {
         $tag = Tag::findOrFail($id);
-        return view('tag.edit', compact('tag'));
+        return Inertia::render('admin/Tag', [
+            'mode' => 'edit',
+            'tag' => $tag
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function post_update(Request $request, $id)
     {
         $tag = Tag::findOrFail($id);
 
         $request->validate([
-            'name' => 'required|string|max:255|unique:tag,name,' . $id,
+            'name' => 'required|string|max:255|unique:tags,name,' . $id
         ]);
 
+        // ===== GENERATE SLUG BARU =====
         $slug = Str::slug($request->name);
-
-        // Cek unique slug
         $originalSlug = $slug;
         $counter = 1;
         while (Tag::where('slug', $slug)->where('id', '!=', $id)->exists()) {
@@ -99,73 +82,21 @@ class TagController extends Controller
             'slug' => $slug,
         ]);
 
-        return redirect()->route('tag.index')
+        return redirect()->route('tag-list')
                 ->with('success', 'Tag berhasil diperbarui!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        $tag = Tag::findOrFail($id);
-
-        // Detach semua relasi dengan artikel
-        $tag->artikels()->detach();
-
-        $tag->delete();
-
-        return redirect()->route('tag.index')
-                ->with('success', 'Tag berhasil dihapus!');
-    }
-
-    /**
-     * Bulk delete tags
-     */
-    public function bulkDelete(Request $request)
+    // ===== DELETE TAG =====
+    public function post_delete(Request $request)
     {
         $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:tag,id',
+            'id' => 'required|exists:tags,id'
         ]);
 
-        $tags = Tag::whereIn('id', $request->ids)->get();
+        $tag = Tag::findOrFail($request->id);
+        $tag->delete();
 
-        foreach ($tags as $tag) {
-            $tag->artikels()->detach();
-            $tag->delete();
-        }
-
-        return redirect()->route('tag.index')
-                ->with('success', count($request->ids) . ' tag berhasil dihapus!');
-    }
-
-    /**
-     * Search tags
-     */
-    public function search(Request $request)
-    {
-        $query = $request->get('q');
-
-        $tags = Tag::where('name', 'LIKE', "%{$query}%")
-                    ->orWhere('slug', 'LIKE', "%{$query}%")
-                    ->withCount('artikels')
-                    ->paginate(10);
-
-        return view('tag.index', compact('tags'));
-    }
-
-    /**
-     * Get tags for select2/ajax
-     */
-    public function getTags(Request $request)
-    {
-        $query = $request->get('q');
-
-        $tags = Tag::where('name', 'LIKE', "%{$query}%")
-                    ->limit(10)
-                    ->get(['id', 'name as text']);
-
-        return response()->json($tags);
+        return redirect()->route('tag-list')
+                ->with('success', 'Tag berhasil dihapus!');
     }
 }

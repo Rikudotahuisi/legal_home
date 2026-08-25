@@ -1,69 +1,88 @@
 <!-- resources/js/Pages/home/Artikel.vue -->
 <template>
-  <HomeLayout>
-    <!-- ============================================================ -->
-    <!-- HERO SECTION -->
-    <!-- ============================================================ -->
-    <section class="relative py-16 md:py-24 bg-gradient-to-r from-blue-950 via-blue-800 to-gray-900 text-white overflow-hidden">
+  <!-- ============================================================ -->
+  <!-- MODE INDEX & SHOW - PAKAI HOME LAYOUT -->
+  <!-- ============================================================ -->
+  <HomeLayout v-if="mode === 'index' || mode === 'show'">
+    <!-- ===== HERO SECTION ===== -->
+    <section v-if="mode === 'index'" class="relative py-16 md:py-24 bg-gradient-to-r from-blue-950 via-blue-800 to-gray-900 text-white overflow-hidden">
       <div class="absolute inset-0 opacity-10">
         <div class="absolute top-0 right-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
         <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-400 rounded-full blur-3xl"></div>
       </div>
       <div class="container mx-auto px-4 relative z-10 text-center">
         <span class="inline-block bg-yellow-400/20 text-yellow-400 px-4 py-1 rounded-full text-sm font-semibold mb-4">
-          <i class="fas fa-newspaper me-2"></i> 
-          <span v-if="mode === 'index'">Artikel Hukum</span>
-          <span v-else-if="mode === 'create'">Buat Artikel</span>
-          <span v-else-if="mode === 'edit'">Edit Artikel</span>
-          <span v-else-if="mode === 'trashed'">Sampah</span>
-          <span v-else>Detail Artikel</span>
+          <i class="fas fa-newspaper me-2"></i> Artikel Hukum
         </span>
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">
-          <span v-if="mode === 'index'">Wawasan & Informasi Hukum</span>
-          <span v-else-if="mode === 'create'">Buat Artikel Baru</span>
-          <span v-else-if="mode === 'edit'">Edit Artikel</span>
-          <span v-else-if="mode === 'trashed'">Artikel Terhapus</span>
-          <span v-else>{{ artikel?.artikeltitle || 'Detail Artikel' }}</span>
-        </h1>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">Wawasan & Informasi Hukum</h1>
         <p class="text-lg md:text-xl max-w-2xl mx-auto opacity-90">
-          <span v-if="mode === 'index'">Artikel terbaru seputar hukum dan peraturan di Indonesia dari tim LegalHome</span>
-          <span v-else-if="mode === 'create' || mode === 'edit'">Bagikan wawasan hukum Anda</span>
-          <span v-else-if="mode === 'trashed'">Artikel yang telah dihapus sementara dapat dipulihkan kembali</span>
-          <span v-else>Baca artikel lengkap dari tim LegalHome</span>
+          Artikel terbaru seputar hukum dan peraturan di Indonesia dari tim LegalHome
         </p>
       </div>
     </section>
 
-    <!-- ============================================================ -->
-    <!-- MODE INDEX -->
-    <!-- ============================================================ -->
+    <!-- ===== MODE INDEX ===== -->
     <template v-if="mode === 'index'">
       <section class="py-16 md:py-20 bg-gray-50">
         <div class="container mx-auto px-4">
+          
+          <!-- Tag Active / Filter Banner -->
+          <div v-if="activeTag" class="mb-6">
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between flex-wrap gap-3">
+              <div class="flex items-center gap-3">
+                <i class="fas fa-tag text-blue-700"></i>
+                <span class="text-sm text-gray-600">Menampilkan artikel dengan tag:</span>
+                <span class="inline-flex items-center gap-2 bg-blue-700 text-white px-4 py-1.5 rounded-full text-sm font-medium">
+                  <i class="fas fa-hashtag"></i>
+                  {{ activeTag.name }}
+                </span>
+              </div>
+              <a href="/artikel" class="text-sm text-blue-700 hover:text-blue-900 transition flex items-center gap-1">
+                <i class="fas fa-times-circle"></i> Hapus Filter
+              </a>
+            </div>
+          </div>
+
+          <!-- Tag Cloud -->
+          <div v-if="allTags && allTags.length > 0" class="mb-8">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-sm text-gray-500 mr-2"><i class="fas fa-tags"></i> Tags:</span>
+              <a v-for="tag in allTags" :key="tag.id" 
+                 :href="`/artikel/tag/${tag.slug}`"
+                 class="px-3 py-1.5 bg-gray-200 hover:bg-blue-600 hover:text-white rounded-full text-sm transition"
+                 :class="activeTag?.id === tag.id ? 'bg-blue-700 text-white' : 'text-gray-700'">
+                {{ tag.name }}
+              </a>
+            </div>
+          </div>
+
           <!-- Header -->
           <div class="flex justify-between items-center flex-wrap gap-4 mb-8">
             <div>
-              <Link :href="'/artikel/trashed'" 
+              <a v-if="isAdmin" href="/artikel/trashed" 
                     class="text-sm text-gray-500 hover:text-red-600 transition inline-flex items-center">
                 <i class="fas fa-trash me-1"></i> Sampah
-              </Link>
+              </a>
             </div>
-            <Link v-if="canCreate" :href="'/artikel/create'" 
+            <a v-if="isAdmin" href="/artikel/create" 
                   class="btn-primary inline-flex items-center">
               <i class="fas fa-plus-circle me-2"></i> Buat Artikel
-            </Link>
+            </a>
           </div>
 
           <!-- Grid Artikel -->
           <div v-if="artikels && artikels.data && artikels.data.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div v-for="item in artikels.data" :key="item.id" 
                  class="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+              
               <!-- Thumbnail -->
               <div class="relative h-48 overflow-hidden">
                 <img v-if="item.image" :src="item.image" class="w-full h-full object-cover" :alt="item.artikeltitle">
                 <div v-else class="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
                   <i class="fas fa-gavel text-6xl text-blue-400/50 group-hover:scale-110 transition duration-500"></i>
                 </div>
+                
+                <!-- Tags di Thumbnail -->
                 <div class="absolute top-3 left-3 flex flex-wrap gap-1">
                   <span v-for="tag in item.tags.slice(0, 2)" :key="tag.id" 
                         class="text-xs bg-blue-700/90 text-white px-2 py-1 rounded-full">
@@ -75,6 +94,7 @@
                   </span>
                 </div>
               </div>
+              
               <div class="p-6">
                 <h5 class="text-xl font-bold mb-2 line-clamp-2 group-hover:text-blue-700 transition">
                   {{ item.artikeltitle }}
@@ -87,14 +107,14 @@
                   <span><i class="fas fa-calendar me-1"></i> {{ formatDate(item.created_at) }}</span>
                 </div>
                 <div class="flex items-center justify-between mt-3">
-                  <Link :href="`/artikel/${item.slug}`"
+                  <a :href="`/artikel/${item.slug}`"
                         class="inline-flex items-center text-blue-700 font-semibold hover:text-blue-900 transition group-hover:translate-x-1 duration-300">
                     Baca Selengkapnya <i class="fas fa-arrow-right ms-2"></i>
-                  </Link>
-                  <Link v-if="canEdit(item)" :href="`/artikel/${item.slug}/edit`" 
+                  </a>
+                  <a v-if="canEdit(item)" :href="`/artikel/${item.slug}/edit`" 
                         class="text-blue-500 hover:text-blue-700 transition text-sm">
                     <i class="fas fa-edit"></i> Edit
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>
@@ -103,19 +123,28 @@
           <!-- Empty State -->
           <div v-else class="text-center py-20 bg-white rounded-2xl shadow-md">
             <i class="fas fa-file-alt text-7xl text-gray-300 mb-4"></i>
-            <h3 class="text-2xl font-semibold text-gray-600">Belum Ada Artikel</h3>
-            <p class="text-gray-400 mt-2">Mulai tulis artikel hukum pertama Anda!</p>
-            <Link v-if="canCreate" :href="'/artikel/create'" 
+            <h3 class="text-2xl font-semibold text-gray-600">
+              <span v-if="activeTag">Tidak ada artikel dengan tag "{{ activeTag.name }}"</span>
+              <span v-else>Belum Ada Artikel</span>
+            </h3>
+            <p class="text-gray-400 mt-2">
+              <span v-if="activeTag">Coba pilih tag lain atau lihat semua artikel</span>
+              <span v-else>Mulai tulis artikel hukum pertama Anda!</span>
+            </p>
+            <div v-if="activeTag" class="mt-4">
+              <a href="/artikel" class="text-blue-700 hover:text-blue-900 transition">Lihat semua artikel →</a>
+            </div>
+            <a v-if="isAdmin && !activeTag" href="/artikel/create" 
                   class="btn-primary inline-flex items-center mt-6">
               <i class="fas fa-plus-circle me-2"></i> Buat Artikel
-            </Link>
+            </a>
           </div>
 
           <!-- Pagination -->
           <div v-if="artikels && artikels.links && artikels.links.length > 3" 
                class="mt-10 flex justify-center">
             <div class="flex gap-2 flex-wrap">
-              <Link v-for="link in artikels.links" 
+              <a v-for="link in artikels.links" 
                     :key="link.label"
                     :href="link.url || '#'"
                     :class="[
@@ -124,124 +153,31 @@
                       !link.url ? 'opacity-50 cursor-not-allowed' : ''
                     ]"
                     v-html="link.label">
-              </Link>
+              </a>
             </div>
           </div>
         </div>
       </section>
-    </template>
 
-    <!-- ============================================================ -->
-    <!-- MODE CREATE -->
-    <!-- ============================================================ -->
-    <template v-else-if="mode === 'create'">
-      <section class="py-16 md:py-20 bg-gray-50">
-        <div class="container mx-auto px-4 max-w-3xl">
-          <Link href="/artikel" class="text-blue-700 hover:text-blue-900 transition inline-flex items-center mb-6">
-            <i class="fas fa-arrow-left me-2"></i> Kembali
-          </Link>
-
-          <form @submit.prevent="submitCreate" enctype="multipart/form-data" class="bg-white p-6 md:p-8 rounded-2xl shadow-md">
-            <!-- Judul -->
-            <div class="mb-5">
-              <label class="block text-sm font-medium mb-1">Judul Artikel <span class="text-red-500">*</span></label>
-              <input type="text" v-model="createForm.artikeltitle" required
-                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                     placeholder="Masukkan judul artikel">
-            </div>
-
-            <!-- Slug -->
-            <div class="mb-5">
-              <label class="block text-sm font-medium mb-1">Slug (URL)</label>
-              <input type="text" v-model="createForm.slug" 
-                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 transition"
-                     placeholder="akan di-generate otomatis">
-              <p class="text-xs text-gray-400 mt-1">
-                <i class="fas fa-info-circle me-1"></i> Kosongkan untuk generate otomatis dari judul
-              </p>
-            </div>
-
-            <!-- Upload Gambar -->
-            <div class="mb-5">
-              <label class="block text-sm font-medium mb-1">Gambar Artikel</label>
-              <div class="relative">
-                <input type="file" @change="handleImageUpload" accept="image/*"
-                       class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                <div class="w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-xl text-center hover:border-blue-500 transition">
-                  <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                  <p class="text-gray-500" v-if="!createForm.imagePreview">Klik untuk upload gambar</p>
-                  <div v-else class="relative">
-                    <img :src="createForm.imagePreview" class="max-h-40 mx-auto rounded-lg" alt="Preview">
-                    <p class="text-sm text-green-600 mt-2">✓ Gambar siap diupload</p>
-                  </div>
-                  <p class="text-xs text-gray-400 mt-2">Format: JPG, PNG, GIF, WebP (Max 5MB)</p>
-                </div>
-              </div>
-              <p v-if="createForm.errors.image" class="text-red-500 text-sm mt-1">{{ createForm.errors.image }}</p>
-            </div>
-
-            <!-- Konten -->
-            <div class="mb-5">
-              <label class="block text-sm font-medium mb-1">Konten <span class="text-red-500">*</span></label>
-              <textarea v-model="createForm.artikelcontent" rows="12" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                        placeholder="Tulis konten artikel di sini..."></textarea>
-            </div>
-
-            <!-- Tags -->
-            <div class="mb-6">
-              <div class="flex items-center justify-between mb-2">
-                <label class="block text-sm font-medium">Tags</label>
-                <a v-if="canManageTags" href="/tag/list" 
-                   class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-full transition">
-                  <i class="fas fa-cog me-1"></i> Kelola Tags
-                </a>
-              </div>
-              <div v-if="tags && tags.length > 0" class="flex flex-wrap gap-3">
-                <label v-for="tag in tags" :key="tag.id" 
-                       class="flex items-center gap-2 cursor-pointer bg-gray-100 px-4 py-2 rounded-full hover:bg-gray-200 transition border-2"
-                       :class="createForm.tags.includes(tag.id) ? 'border-blue-500 bg-blue-50' : 'border-transparent'">
-                  <input type="checkbox" :value="tag.id" v-model="createForm.tags" class="hidden">
-                  <span class="text-sm">{{ tag.name }}</span>
-                  <span v-if="createForm.tags.includes(tag.id)" class="text-blue-600">
-                    <i class="fas fa-check-circle"></i>
-                  </span>
-                </label>
-              </div>
-              <p v-else class="text-sm text-gray-400 bg-gray-50 p-3 rounded-xl">
-                <i class="fas fa-info-circle me-1"></i> Belum ada tags. 
-                <a v-if="canManageTags" href="/tag/list" class="text-blue-700 hover:underline">Tambahkan di sini</a>
-                <span v-else>Hubungi admin untuk menambahkan tags.</span>
-              </p>
-            </div>
-
-            <!-- Tombol -->
-            <div class="flex flex-wrap gap-4 pt-4 border-t border-gray-200">
-              <button type="submit" :disabled="loading" 
-                      class="btn-primary flex-1 md:flex-none px-8 py-3">
-                <i v-if="loading" class="fas fa-spinner fa-spin me-2"></i>
-                <i v-else class="fas fa-paper-plane me-2"></i>
-                {{ loading ? 'Menyimpan...' : 'Publikasikan Artikel' }}
-              </button>
-              <Link href="/artikel" 
-                    class="px-6 py-3 border border-gray-300 rounded-full hover:bg-gray-50 transition text-center flex-1 md:flex-none">
-                Batal
-              </Link>
-            </div>
-          </form>
+      <!-- CTA -->
+      <section class="py-16 bg-gradient-to-r from-blue-900 to-blue-700 text-white">
+        <div class="container mx-auto px-4 text-center">
+          <h3 class="text-2xl font-bold mb-2">Butuh Konsultasi Hukum?</h3>
+          <p class="text-lg mb-6 opacity-90">Tim advokat kami siap membantu Anda</p>
+          <a href="/contact" class="btn-hero inline-flex items-center">
+            <i class="fas fa-handshake me-2"></i> Konsultasi Sekarang
+          </a>
         </div>
       </section>
     </template>
 
-    <!-- ============================================================ -->
-    <!-- MODE SHOW -->
-    <!-- ============================================================ -->
+    <!-- ===== MODE SHOW ===== -->
     <template v-else-if="mode === 'show' && artikel">
       <section class="py-16 md:py-20 bg-gray-50">
         <div class="container mx-auto px-4 max-w-3xl">
-          <Link href="/artikel" class="text-blue-700 hover:text-blue-900 transition inline-flex items-center mb-6">
+          <a href="/artikel" class="text-blue-700 hover:text-blue-900 transition inline-flex items-center mb-6">
             <i class="fas fa-arrow-left me-2"></i> Kembali ke Daftar Artikel
-          </Link>
+          </a>
 
           <article class="bg-white p-6 md:p-8 rounded-2xl shadow-md">
             <!-- Gambar Artikel -->
@@ -283,10 +219,10 @@
 
             <!-- Action Buttons -->
             <div v-if="isCreator" class="mt-8 pt-6 border-t border-gray-200 flex flex-wrap gap-4">
-              <Link :href="`/artikel/${artikel.slug}/edit`" 
+              <a :href="`/artikel/${artikel.slug}/edit`" 
                     class="btn-edit inline-flex items-center">
                 <i class="fas fa-edit me-2"></i> Edit Artikel
-              </Link>
+              </a>
               <button @click="deleteArtikel(artikel.slug)" 
                       class="btn-delete inline-flex items-center">
                 <i class="fas fa-trash me-2"></i> Hapus
@@ -319,207 +255,287 @@
         </div>
       </section>
     </template>
+  </HomeLayout>
 
-    <!-- ============================================================ -->
-    <!-- MODE EDIT -->
-    <!-- ============================================================ -->
-    <template v-else-if="mode === 'edit' && artikel">
-      <section class="py-16 md:py-20 bg-gray-50">
-        <div class="container mx-auto px-4 max-w-3xl">
-          <Link href="/artikel" class="text-blue-700 hover:text-blue-900 transition inline-flex items-center mb-6">
-            <i class="fas fa-arrow-left me-2"></i> Kembali
-          </Link>
-
-          <form @submit.prevent="submitEdit" enctype="multipart/form-data" class="bg-white p-6 md:p-8 rounded-2xl shadow-md">
-            <!-- Judul -->
-            <div class="mb-5">
-              <label class="block text-sm font-medium mb-1">Judul Artikel <span class="text-red-500">*</span></label>
-              <input type="text" v-model="editForm.artikeltitle" required
-                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-            </div>
-
-            <!-- Slug -->
-            <div class="mb-5">
-              <label class="block text-sm font-medium mb-1">Slug (URL)</label>
-              <input type="text" v-model="editForm.slug" 
-                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 transition">
-              <p class="text-xs text-gray-400 mt-1">
-                <i class="fas fa-info-circle me-1"></i> Kosongkan untuk generate otomatis dari judul
-              </p>
-            </div>
-
-            <!-- Upload Gambar -->
-            <div class="mb-5">
-              <label class="block text-sm font-medium mb-1">Gambar Artikel</label>
-              <div v-if="editForm.existingImage && !editForm.imagePreview" class="mb-3">
-                <p class="text-sm text-gray-500 mb-1">Gambar saat ini:</p>
-                <img :src="editForm.existingImage" class="max-h-32 rounded-lg border" alt="Current image">
-              </div>
-              <div class="relative">
-                <input type="file" @change="handleEditImageUpload" accept="image/*"
-                       class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                <div class="w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-xl text-center hover:border-blue-500 transition">
-                  <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                  <p class="text-gray-500" v-if="!editForm.imagePreview">Klik untuk upload gambar baru</p>
-                  <div v-else class="relative">
-                    <img :src="editForm.imagePreview" class="max-h-40 mx-auto rounded-lg" alt="Preview">
-                    <p class="text-sm text-green-600 mt-2">✓ Gambar baru siap diupload</p>
-                  </div>
-                  <p class="text-xs text-gray-400 mt-2">Format: JPG, PNG, GIF, WebP (Max 5MB)</p>
-                </div>
-              </div>
-              <p v-if="editForm.errors.image" class="text-red-500 text-sm mt-1">{{ editForm.errors.image }}</p>
-            </div>
-
-            <!-- Konten -->
-            <div class="mb-5">
-              <label class="block text-sm font-medium mb-1">Konten <span class="text-red-500">*</span></label>
-              <textarea v-model="editForm.artikelcontent" rows="12" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"></textarea>
-            </div>
-
-            <!-- ===== TAGS SECTION ===== -->
-            <div class="mb-6">
-            <div class="flex items-center justify-between mb-2">
-           <label class="block text-sm font-medium">Tags</label>
+  <!-- ============================================================ -->
+  <!-- MODE CREATE, EDIT, TRASHED - PAKAI ADMIN LAYOUT -->
+  <!-- ============================================================ -->
+  <AdminLayout v-else-if="mode === 'create' || mode === 'edit' || mode === 'trashed'">
     
-           <!-- ===== TOMBOL KELOLA TAGS (ADMIN ONLY) ===== -->
-          <a v-if="canManageTags" href="/tag/list" 
-           class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-full transition inline-flex items-center">
-           <i class="fas fa-cog me-1"></i> Kelola Tags
-          </a>
-          </div>
-  
-          <!-- Daftar Tags (Checkbox) -->
-          <div v-if="tags && tags.length > 0" class="flex flex-wrap gap-3">
-          <label v-for="tag in tags" :key="tag.id" 
-           class="flex items-center gap-2 cursor-pointer bg-gray-100 px-4 py-2 rounded-full hover:bg-gray-200 transition border-2"
-           :class="createForm.tags.includes(tag.id) ? 'border-blue-500 bg-blue-50' : 'border-transparent'">
-          <input type="checkbox" :value="tag.id" v-model="createForm.tags" class="hidden">
-          <span class="text-sm">{{ tag.name }}</span>
-          <span v-if="createForm.tags.includes(tag.id)" class="text-blue-600">
-          <i class="fas fa-check-circle"></i>
-       </span>
-      </label>
-    </div>
-  
-          <p v-else class="text-sm text-gray-400 bg-gray-50 p-3 rounded-xl">
-          <i class="fas fa-info-circle me-1"></i> Belum ada tags. 
-          <a v-if="canManageTags" href="/tag/create" class="text-blue-700 hover:underline">Tambahkan di sini</a>
-         <span v-else>Hubungi admin untuk menambahkan tags.</span>
-        </p>
+    <!-- ===== MODE CREATE ===== -->
+    <template v-if="mode === 'create'">
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Buat Artikel Baru</h1>
+        <p class="text-gray-500">Bagikan wawasan hukum Anda</p>
       </div>
 
-            <!-- Tombol -->
-            <div class="flex flex-wrap gap-4 pt-4 border-t border-gray-200">
-              <button type="submit" :disabled="loading" 
-                      class="btn-primary flex-1 md:flex-none px-8 py-3">
-                <i v-if="loading" class="fas fa-spinner fa-spin me-2"></i>
-                <i v-else class="fas fa-save me-2"></i>
-                {{ loading ? 'Menyimpan...' : 'Perbarui Artikel' }}
-              </button>
-              <Link href="/artikel" 
-                    class="px-6 py-3 border border-gray-300 rounded-full hover:bg-gray-50 transition text-center flex-1 md:flex-none">
-                Batal
-              </Link>
-            </div>
-          </form>
-        </div>
-      </section>
-    </template>
-
-    <!-- ============================================================ -->
-    <!-- MODE TRASHED -->
-    <!-- ============================================================ -->
-    <template v-else-if="mode === 'trashed'">
-      <section class="py-16 md:py-20 bg-gray-50">
-        <div class="container mx-auto px-4">
-          <div class="flex justify-between items-center flex-wrap gap-4 mb-8">
-            <Link href="/artikel" class="text-blue-700 hover:text-blue-900 transition inline-flex items-center">
-              <i class="fas fa-arrow-left me-2"></i> Kembali
-            </Link>
-            <span class="text-sm text-gray-500">
-              <i class="fas fa-trash me-1"></i> {{ artikels?.total || 0 }} artikel terhapus
-            </span>
+      <div class="bg-white rounded-2xl shadow-sm p-6">
+        <form @submit.prevent="submitCreate" enctype="multipart/form-data">
+          <!-- Judul -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium mb-1">Judul Artikel <span class="text-red-500">*</span></label>
+            <input type="text" v-model="createForm.artikeltitle" required
+                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                   placeholder="Masukkan judul artikel">
           </div>
 
-          <div v-if="artikels && artikels.data && artikels.data.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div v-for="item in artikels.data" :key="item.id" 
-                 class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition border-l-4 border-red-500">
-              <div class="p-6">
-                <div class="flex flex-wrap gap-2 mb-2">
-                  <span v-for="tag in item.tags.slice(0, 2)" :key="tag.id" 
-                        class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
-                    {{ tag.name }}
-                  </span>
+          <!-- Slug -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium mb-1">Slug (URL)</label>
+            <input type="text" v-model="createForm.slug" 
+                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 transition"
+                   placeholder="akan di-generate otomatis">
+            <p class="text-xs text-gray-400 mt-1">
+              <i class="fas fa-info-circle me-1"></i> Kosongkan untuk generate otomatis dari judul
+            </p>
+          </div>
+
+          <!-- Upload Gambar -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium mb-1">Gambar Artikel</label>
+            <div class="relative">
+              <input type="file" @change="handleImageUpload" accept="image/*"
+                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+              <div class="w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-xl text-center hover:border-blue-500 transition">
+                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                <p class="text-gray-500" v-if="!createForm.imagePreview">Klik untuk upload gambar</p>
+                <div v-else class="relative">
+                  <img :src="createForm.imagePreview" class="max-h-40 mx-auto rounded-lg" alt="Preview">
+                  <p class="text-sm text-green-600 mt-2">✓ Gambar siap diupload</p>
                 </div>
-                <h5 class="text-lg font-bold mb-2 line-clamp-2">{{ item.artikeltitle }}</h5>
-                <p class="text-sm text-gray-500 mb-3">
-                  <i class="fas fa-trash me-1"></i> Dihapus: {{ formatDate(item.deleted_at) }}
-                </p>
-                <div class="flex flex-wrap gap-2">
-                  <button @click="restoreArtikel(item.id)" 
-                          class="btn-restore text-sm inline-flex items-center px-4 py-1.5 rounded-full">
-                    <i class="fas fa-undo me-1"></i> Pulihkan
-                  </button>
-                  <button @click="forceDelete(item.id)" 
-                          class="btn-force-delete text-sm inline-flex items-center px-4 py-1.5 rounded-full">
-                    <i class="fas fa-times-circle me-1"></i> Hapus Permanen
-                  </button>
+                <p class="text-xs text-gray-400 mt-2">Format: JPG, PNG, GIF, WebP (Max 5MB)</p>
+              </div>
+            </div>
+            <p v-if="createForm.errors.image" class="text-red-500 text-sm mt-1">{{ createForm.errors.image }}</p>
+          </div>
+
+          <!-- Konten -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium mb-1">Konten <span class="text-red-500">*</span></label>
+            <textarea v-model="createForm.artikelcontent" rows="12" required
+                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      placeholder="Tulis konten artikel di sini..."></textarea>
+          </div>
+
+          <!-- Tags -->
+          <div class="mb-6">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-sm font-medium">Tags</label>
+              <a href="/tag/list" 
+                 class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-full transition inline-flex items-center">
+                <i class="fas fa-cog me-1"></i> Kelola Tags
+              </a>
+            </div>
+            <div v-if="tags && tags.length > 0" class="flex flex-wrap gap-3">
+              <label v-for="tag in tags" :key="tag.id" 
+                     class="flex items-center gap-2 cursor-pointer bg-gray-100 px-4 py-2 rounded-full hover:bg-gray-200 transition border-2"
+                     :class="createForm.tags.includes(tag.id) ? 'border-blue-500 bg-blue-50' : 'border-transparent'">
+                <input type="checkbox" :value="tag.id" v-model="createForm.tags" class="hidden">
+                <span class="text-sm">{{ tag.name }}</span>
+                <span v-if="createForm.tags.includes(tag.id)" class="text-blue-600">
+                  <i class="fas fa-check-circle"></i>
+                </span>
+              </label>
+            </div>
+            <p v-else class="text-sm text-gray-400 bg-gray-50 p-3 rounded-xl">
+              <i class="fas fa-info-circle me-1"></i> Belum ada tags. 
+              <a href="/tag/create" class="text-blue-700 hover:underline">Tambahkan di sini</a>
+            </p>
+          </div>
+
+          <!-- Tombol -->
+          <div class="flex flex-wrap gap-4 pt-4 border-t border-gray-200">
+            <button type="submit" :disabled="loading" 
+                    class="btn-primary flex-1 md:flex-none px-8 py-3">
+              <i v-if="loading" class="fas fa-spinner fa-spin me-2"></i>
+              <i v-else class="fas fa-paper-plane me-2"></i>
+              {{ loading ? 'Menyimpan...' : 'Publikasikan Artikel' }}
+            </button>
+            <a href="/artikel" 
+                  class="px-6 py-3 border border-gray-300 rounded-full hover:bg-gray-50 transition text-center flex-1 md:flex-none">
+              Batal
+            </a>
+          </div>
+        </form>
+      </div>
+    </template>
+
+    <!-- ===== MODE EDIT ===== -->
+    <template v-else-if="mode === 'edit' && artikel">
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Edit Artikel</h1>
+        <p class="text-gray-500">Perbarui artikel Anda</p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm p-6">
+        <form @submit.prevent="submitEdit" enctype="multipart/form-data">
+          <!-- Judul -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium mb-1">Judul Artikel <span class="text-red-500">*</span></label>
+            <input type="text" v-model="editForm.artikeltitle" required
+                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+          </div>
+
+          <!-- Slug -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium mb-1">Slug (URL)</label>
+            <input type="text" v-model="editForm.slug" 
+                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 transition">
+            <p class="text-xs text-gray-400 mt-1">
+              <i class="fas fa-info-circle me-1"></i> Kosongkan untuk generate otomatis dari judul
+            </p>
+          </div>
+
+          <!-- Upload Gambar -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium mb-1">Gambar Artikel</label>
+            <div v-if="editForm.existingImage && !editForm.imagePreview" class="mb-3">
+              <p class="text-sm text-gray-500 mb-1">Gambar saat ini:</p>
+              <img :src="editForm.existingImage" class="max-h-32 rounded-lg border" alt="Current image">
+            </div>
+            <div class="relative">
+              <input type="file" @change="handleEditImageUpload" accept="image/*"
+                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+              <div class="w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-xl text-center hover:border-blue-500 transition">
+                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                <p class="text-gray-500" v-if="!editForm.imagePreview">Klik untuk upload gambar baru</p>
+                <div v-else class="relative">
+                  <img :src="editForm.imagePreview" class="max-h-40 mx-auto rounded-lg" alt="Preview">
+                  <p class="text-sm text-green-600 mt-2">✓ Gambar baru siap diupload</p>
                 </div>
+                <p class="text-xs text-gray-400 mt-2">Format: JPG, PNG, GIF, WebP (Max 5MB)</p>
+              </div>
+            </div>
+            <p v-if="editForm.errors.image" class="text-red-500 text-sm mt-1">{{ editForm.errors.image }}</p>
+          </div>
+
+          <!-- Konten -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium mb-1">Konten <span class="text-red-500">*</span></label>
+            <textarea v-model="editForm.artikelcontent" rows="12" required
+                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"></textarea>
+          </div>
+
+          <!-- Tags -->
+          <div class="mb-6">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-sm font-medium">Tags</label>
+              <a href="/tag/list" 
+                 class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-full transition inline-flex items-center">
+                <i class="fas fa-cog me-1"></i> Kelola Tags
+              </a>
+            </div>
+            <div v-if="tags && tags.length > 0" class="flex flex-wrap gap-3">
+              <label v-for="tag in tags" :key="tag.id" 
+                     class="flex items-center gap-2 cursor-pointer bg-gray-100 px-4 py-2 rounded-full hover:bg-gray-200 transition border-2"
+                     :class="editForm.tags.includes(tag.id) ? 'border-blue-500 bg-blue-50' : 'border-transparent'">
+                <input type="checkbox" :value="tag.id" v-model="editForm.tags" class="hidden">
+                <span class="text-sm">{{ tag.name }}</span>
+                <span v-if="editForm.tags.includes(tag.id)" class="text-blue-600">
+                  <i class="fas fa-check-circle"></i>
+                </span>
+              </label>
+            </div>
+            <p v-else class="text-sm text-gray-400 bg-gray-50 p-3 rounded-xl">
+              <i class="fas fa-info-circle me-1"></i> Belum ada tags.
+            </p>
+          </div>
+
+          <!-- Tombol -->
+          <div class="flex flex-wrap gap-4 pt-4 border-t border-gray-200">
+            <button type="submit" :disabled="loading" 
+                    class="btn-primary flex-1 md:flex-none px-8 py-3">
+              <i v-if="loading" class="fas fa-spinner fa-spin me-2"></i>
+              <i v-else class="fas fa-save me-2"></i>
+              {{ loading ? 'Menyimpan...' : 'Perbarui Artikel' }}
+            </button>
+            <a href="/artikel" 
+                  class="px-6 py-3 border border-gray-300 rounded-full hover:bg-gray-50 transition text-center flex-1 md:flex-none">
+              Batal
+            </a>
+          </div>
+        </form>
+      </div>
+    </template>
+
+    <!-- ===== MODE TRASHED ===== -->
+    <template v-else-if="mode === 'trashed'">
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Sampah</h1>
+        <p class="text-gray-500">Artikel yang telah dihapus sementara</p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm p-6">
+        <div class="flex justify-between items-center flex-wrap gap-4 mb-6">
+          <a href="/artikel" class="text-blue-700 hover:text-blue-900 transition inline-flex items-center">
+            <i class="fas fa-arrow-left me-2"></i> Kembali
+          </a>
+          <span class="text-sm text-gray-500">
+            <i class="fas fa-trash me-1"></i> {{ artikels?.total || 0 }} artikel terhapus
+          </span>
+        </div>
+
+        <div v-if="artikels && artikels.data && artikels.data.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div v-for="item in artikels.data" :key="item.id" 
+               class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition border-l-4 border-red-500">
+            <div class="p-6">
+              <div class="flex flex-wrap gap-2 mb-2">
+                <span v-for="tag in item.tags.slice(0, 2)" :key="tag.id" 
+                      class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                  {{ tag.name }}
+                </span>
+              </div>
+              <h5 class="text-lg font-bold mb-2 line-clamp-2">{{ item.artikeltitle }}</h5>
+              <p class="text-sm text-gray-500 mb-3">
+                <i class="fas fa-trash me-1"></i> Dihapus: {{ formatDate(item.deleted_at) }}
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <button @click="restoreArtikel(item.id)" 
+                        class="btn-restore text-sm inline-flex items-center px-4 py-1.5 rounded-full">
+                  <i class="fas fa-undo me-1"></i> Pulihkan
+                </button>
+                <button @click="forceDelete(item.id)" 
+                        class="btn-force-delete text-sm inline-flex items-center px-4 py-1.5 rounded-full">
+                  <i class="fas fa-times-circle me-1"></i> Hapus Permanen
+                </button>
               </div>
             </div>
           </div>
+        </div>
 
-          <div v-else class="text-center py-20 bg-white rounded-2xl shadow-md">
-            <i class="fas fa-trash-alt text-7xl text-gray-300 mb-4"></i>
-            <h3 class="text-2xl font-semibold text-gray-600">Tidak Ada Artikel Terhapus</h3>
-            <p class="text-gray-400 mt-2">Sampah kosong</p>
-          </div>
+        <div v-else class="text-center py-12">
+          <i class="fas fa-trash-alt text-5xl text-gray-300 mb-4"></i>
+          <p class="text-gray-400">Tidak ada artikel terhapus</p>
+        </div>
 
-          <div v-if="artikels && artikels.links && artikels.links.length > 3" 
-               class="mt-10 flex justify-center">
-            <div class="flex gap-2 flex-wrap">
-              <Link v-for="link in artikels.links" 
-                    :key="link.label"
-                    :href="link.url || '#'"
-                    :class="[
-                      'px-4 py-2 rounded-lg border transition min-w-[40px] text-center',
-                      link.active ? 'bg-red-700 text-white border-red-700' : 'bg-white hover:bg-gray-50 border-gray-300 text-gray-700',
-                      !link.url ? 'opacity-50 cursor-not-allowed' : ''
-                    ]"
-                    v-html="link.label">
-              </Link>
-            </div>
+        <div v-if="artikels && artikels.links && artikels.links.length > 3" 
+             class="mt-6 flex justify-center">
+          <div class="flex gap-2 flex-wrap">
+            <a v-for="link in artikels.links" 
+                  :key="link.label"
+                  :href="link.url || '#'"
+                  :class="[
+                    'px-4 py-2 rounded-lg border transition min-w-[40px] text-center',
+                    link.active ? 'bg-red-700 text-white border-red-700' : 'bg-white hover:bg-gray-50 border-gray-300 text-gray-700',
+                    !link.url ? 'opacity-50 cursor-not-allowed' : ''
+                  ]"
+                  v-html="link.label">
+            </a>
           </div>
         </div>
-      </section>
+      </div>
     </template>
-
-    <!-- ============================================================ -->
-    <!-- CTA -->
-    <!-- ============================================================ -->
-    <template v-if="mode === 'index'">
-      <section class="py-16 bg-gradient-to-r from-blue-900 to-blue-700 text-white">
-        <div class="container mx-auto px-4 text-center">
-          <h3 class="text-2xl font-bold mb-2">Butuh Konsultasi Hukum?</h3>
-          <p class="text-lg mb-6 opacity-90">Tim advokat kami siap membantu Anda</p>
-          <a href="/contact" class="btn-hero inline-flex items-center">
-            <i class="fas fa-handshake me-2"></i> Konsultasi Sekarang
-          </a>
-        </div>
-      </section>
-    </template>
-  </HomeLayout>
+  </AdminLayout>
 </template>
 
 <script>
-import { Link, useForm, usePage } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import HomeLayout from '@/Layouts/HomeLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 
 export default {
   name: 'Artikel',
-  components: { HomeLayout, Link },
+  components: { HomeLayout, AdminLayout },
   props: {
     mode: { type: String, default: 'index' },
     artikels: { type: Object, default: null },
@@ -527,7 +543,9 @@ export default {
     canManageTags: { type: Boolean, default: false },
     tags: { type: Array, default: () => [] },
     artikel: { type: Object, default: null },
-    selectedTags: { type: Array, default: () => [] }
+    selectedTags: { type: Array, default: () => [] },
+    activeTag: { type: Object, default: null },
+    allTags: { type: Array, default: () => [] }
   },
   data() {
     return {
@@ -554,6 +572,9 @@ export default {
   computed: {
     user() {
       return usePage().props.auth?.user || null;
+    },
+    isAdmin() {
+      return this.user?.role === 'admin';
     },
     isCreator() {
       return this.artikel?.created_by === this.user?.id;

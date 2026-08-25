@@ -39,10 +39,10 @@ Route::prefix('artikel')->group(function () {
             'mode' => 'create',
             'tags' => Tag::all()
         ]);
-    })->middleware('auth')->name('artikel.create');
+    })->middleware(['auth', 'role:admin'])->name('artikel.create');
 
     Route::post('/', [ArtikelController::class, 'store'])
-        ->middleware('auth')
+        ->middleware(['auth', 'role:admin'])
         ->name('artikel.store');
 
     Route::get('/trashed', function () {
@@ -55,14 +55,14 @@ Route::prefix('artikel')->group(function () {
             'mode' => 'trashed',
             'artikels' => $artikels
         ]);
-    })->middleware('auth')->name('artikel.trashed');
+    })->middleware(['auth', 'role:admin'])->name('artikel.trashed');
 
     Route::post('/restore/{id}', [ArtikelController::class, 'restore'])
-        ->middleware('auth')
+        ->middleware(['auth', 'role:admin'])
         ->name('artikel.restore');
 
     Route::delete('/force-delete/{id}', [ArtikelController::class, 'forceDelete'])
-        ->middleware('auth')
+        ->middleware(['auth', 'role:admin'])
         ->name('artikel.force-delete');
 
     Route::get('/{slug}', function ($slug) {
@@ -83,14 +83,14 @@ Route::prefix('artikel')->group(function () {
             'tags' => Tag::all(),
             'selectedTags' => $artikel->tags->pluck('id')->toArray()
         ]);
-    })->middleware('auth')->name('artikel.edit');
+    })->middleware(['auth', 'role:admin'])->name('artikel.edit');
 
     Route::put('/{slug}', [ArtikelController::class, 'update'])
-        ->middleware('auth')
+        ->middleware(['auth', 'role:admin'])
         ->name('artikel.update');
 
     Route::delete('/{slug}', [ArtikelController::class, 'destroy'])
-        ->middleware('auth')
+        ->middleware(['auth', 'role:admin'])
         ->name('artikel.destroy');
 });
 

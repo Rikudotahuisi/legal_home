@@ -46,6 +46,13 @@
                 <a href="/tag/list" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
                   <i class="fas fa-tags me-2"></i> Manage Tags
                 </a>
+                <a href="/galery/create" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
+                  <i class="fas fa-image me-2"></i> Upload Gallery
+                </a>
+                <a href="/artikel/create" class="block px-4 py-2.5
+                    text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
+                    <i class="fas fa-plus-circle me-2"></i> Create Article
+                </a>
                 <a href="/artikel/trashed" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
                   <i class="fas fa-trash me-2"></i> Trash
                 </a>
